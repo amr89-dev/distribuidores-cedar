@@ -33,17 +33,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
+import { Badge } from "../ui/badge";
 
 const data: Product[] = [
   {
-    referencia: 1023456,
+    referencia: 1045699,
+    marca: "Fender",
     descripcion: "guitarra fender stratocaster",
     precio: 850000,
     stock: 120,
-    image: "https://loremflickr.com/320/240/guitar",
+    image:
+      "https://cdn.shopify.com/s/files/1/0512/9116/0767/files/guitarra-electroacustica-martin-d-x2e-burst-the-music-site-1.jpg?v=1715379907",
   },
   {
     referencia: 1098765,
+    marca: "Yamaha",
     descripcion: "bajo yamaha TRBX",
     precio: 900000,
     stock: 60,
@@ -51,6 +55,7 @@ const data: Product[] = [
   },
   {
     referencia: 1234567,
+    marca: "Pearl",
     descripcion: "batería Pearl Export",
     precio: 2500000,
     stock: 20,
@@ -58,6 +63,7 @@ const data: Product[] = [
   },
   {
     referencia: 1357924,
+    marca: "Roland",
     descripcion: "teclado Roland FP-30",
     precio: 1600000,
     stock: 30,
@@ -65,6 +71,7 @@ const data: Product[] = [
   },
   {
     referencia: 1425367,
+    marca: "Marshall",
     descripcion: "amplificador Marshall MG",
     precio: 450000,
     stock: 70,
@@ -72,6 +79,7 @@ const data: Product[] = [
   },
   {
     referencia: 1548792,
+    marca: "Shure",
     descripcion: "micrófono Shure SM58",
     precio: 300000,
     stock: 150,
@@ -79,6 +87,7 @@ const data: Product[] = [
   },
   {
     referencia: 1654321,
+    marca: "BOSS",
     descripcion: "pedal de distorsión BOSS DS-1",
     precio: 350000,
     stock: 80,
@@ -86,20 +95,23 @@ const data: Product[] = [
   },
   {
     referencia: 1789246,
+    marca: "Korg",
     descripcion: "sintetizador Korg Minilogue",
     precio: 1200000,
-    stock: 40,
+    stock: 0,
     image: "https://loremflickr.com/320/240/synthesizer",
   },
   {
     referencia: 1897432,
+    marca: "Gibson",
     descripcion: "guitarra Gibson Les Paul",
     precio: 2100000,
-    stock: 25,
+    stock: 8,
     image: "https://loremflickr.com/320/240/guitar",
   },
   {
     referencia: 1987654,
+    marca: "Ludwig",
     descripcion: "caja Ludwig Black Beauty",
     precio: 1400000,
     stock: 10,
@@ -109,10 +121,16 @@ const data: Product[] = [
 
 export type Product = {
   referencia: number;
+  marca: string;
   descripcion: string;
   precio: number;
   stock: number;
   image: string;
+};
+const getStockStatus = (stock: number): { text: string; color: string } => {
+  if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
+  if (stock <= 10) return { text: "Pocas unidades", color: "bg-yellow-500" };
+  return { text: "Disponible", color: "bg-green-500" };
 };
 
 export const columns: ColumnDef<Product>[] = [
@@ -128,21 +146,7 @@ export const columns: ColumnDef<Product>[] = [
       />
     ),
   },
-  {
-    accessorKey: "referencia",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Referencia
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("referencia")}</div>,
-  },
+
   {
     accessorKey: "descripcion",
     header: ({ column }) => {
@@ -157,6 +161,21 @@ export const columns: ColumnDef<Product>[] = [
       );
     },
     cell: ({ row }) => <div>{row.getValue("descripcion")}</div>,
+  },
+  {
+    accessorKey: "referencia",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Referencia
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("referencia")}</div>,
   },
   {
     accessorKey: "precio",
@@ -183,10 +202,37 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    id: "actions",
-    header: "Actions",
+    accessorKey: "stock",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Stock
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
-      <div>{row.getValue("actions")}</div>;
+      const stockStatus = getStockStatus(row.getValue("stock"));
+
+      return (
+        <Badge className={`${stockStatus.color} text-white`}>
+          {stockStatus.text}
+        </Badge>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    cell: ({ row }) => {
+      const stock: boolean = row.getValue("stock");
+
+      return (
+        <Button size="lg" disabled={stock <= 0}>
+          Comprar
+        </Button>
+      );
     },
   },
   {
