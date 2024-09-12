@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/table";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
+import { Product } from "@/types";
 
 const data: Product[] = [
   {
@@ -119,14 +120,6 @@ const data: Product[] = [
   },
 ];
 
-export type Product = {
-  referencia: number;
-  marca: string;
-  descripcion: string;
-  precio: number;
-  stock: number;
-  image: string;
-};
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
   if (stock <= 10) return { text: "Pocas unidades", color: "bg-yellow-500" };
@@ -226,7 +219,7 @@ export const columns: ColumnDef<Product>[] = [
     id: "actions",
     header: "Acciones",
     cell: ({ row }) => {
-      const stock: boolean = row.getValue("stock");
+      const stock: number = row.getValue("stock");
 
       return (
         <Button size="lg" disabled={stock <= 0}>
