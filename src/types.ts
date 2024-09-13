@@ -1,8 +1,9 @@
 export interface Product {
-  referencia: number;
+  referencia: string;
   marca: string;
   descripcion: string;
   precio: number;
-  stock: number;
-  image?: string;
+  saldo: number;
+
+  images?: string[];
 }
