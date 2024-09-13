@@ -16,7 +16,7 @@ import {
 import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+//import { Checkbox } from "@/components/ui/checkbox";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -56,6 +56,7 @@ export const columns: ColumnDef<Product>[] = [
           height={100}
           placeholder="blur"
           blurDataURL="/imagePlaceholder.png"
+          className="rounded-lg max-h-[100px] w-auto mx-auto"
         />
       );
     },
@@ -91,6 +92,43 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => <div>{row.getValue("referencia")}</div>,
   },
   {
+    accessorKey: "marca",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Marca
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("marca")}</div>,
+  },
+
+  {
+    accessorKey: "stock",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Stock
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const stockStatus = getStockStatus(row.getValue("stock"));
+
+      return (
+        <Badge className={`${stockStatus.color} text-white`}>
+          {stockStatus.text}
+        </Badge>
+      );
+    },
+  },
+  {
     accessorKey: "precio",
     header: ({ column }) => (
       <Button
@@ -115,27 +153,6 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    accessorKey: "stock",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Stock
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const stockStatus = getStockStatus(row.getValue("stock"));
-
-      return (
-        <Badge className={`${stockStatus.color} text-white`}>
-          {stockStatus.text}
-        </Badge>
-      );
-    },
-  },
-  {
     id: "actions",
     header: "Acciones",
     cell: ({ row }) => {
@@ -143,12 +160,12 @@ export const columns: ColumnDef<Product>[] = [
 
       return (
         <Button size="lg" disabled={stock <= 0}>
-          Comprar
+          Agregar
         </Button>
       );
     },
   },
-  {
+  /* {
     id: "select",
     header: ({ table }) => (
       <Checkbox
@@ -169,10 +186,10 @@ export const columns: ColumnDef<Product>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
-  },
+  }, */
 ];
 
-export async function MainTable({ data }: { data: Product[] }) {
+export function MainTable({ data }: { data: Product[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -199,18 +216,23 @@ export async function MainTable({ data }: { data: Product[] }) {
       rowSelection,
     },
   });
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const startRow = pageIndex * pageSize + 1;
+  const endRow = Math.min((pageIndex + 1) * pageSize, data.length);
 
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filtrar..."
+          placeholder="Buscar..."
           value={
-            (table.getColumn("referencia")?.getFilterValue() as string) ?? ""
+            (table.getColumn("descripcion")?.getFilterValue() as string) ??
+            (table.getColumn("referencia")?.getFilterValue() as string) ??
+            ""
           }
-          onChange={(event) =>
-            table.getColumn("referencia")?.setFilterValue(event.target.value)
-          }
+          onChange={(event) => {
+            table.getColumn("descripcion")?.setFilterValue(event.target.value);
+          }}
           className="max-w-sm"
         />
       </div>
@@ -257,7 +279,7 @@ export async function MainTable({ data }: { data: Product[] }) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Sin resultados.
                 </TableCell>
               </TableRow>
             )}
@@ -266,8 +288,7 @@ export async function MainTable({ data }: { data: Product[] }) {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          Mostrando {startRow} a {endRow} de {data.length} fila(s).
         </div>
         <div className="space-x-2">
           <Button
@@ -276,7 +297,7 @@ export async function MainTable({ data }: { data: Product[] }) {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             variant="outline"
@@ -284,7 +305,7 @@ export async function MainTable({ data }: { data: Product[] }) {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Siguiente
           </Button>
         </div>
       </div>

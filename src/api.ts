@@ -1,7 +1,7 @@
 import { Product } from "./types";
 
 const DB_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6V1hruH3Z6k7GDwY-p8exNH71Yf-XVagsD9tQPLT96YrzQPJZxz2iLgNuhSSohGIneMi-ocnZJavo/pub?gid=1968686925&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR1uamd5qFtbymbC2jekhhXyTBDw_sBUwoerUvNz_UBlLKhKBE-eGbWQfBetSeESATX8Tiw3kYZG2sz/pub?gid=941749917&single=true&output=csv";
 
 export const getProducts = async (): Promise<Product[]> => {
   try {
@@ -16,15 +16,17 @@ export const getProducts = async (): Promise<Product[]> => {
         descripcion: arrRow[1].trim(),
         precio: Number(arrRow[2]),
         saldo: Number(arrRow[3]),
-        marca: arrRow[4].trim(),
-        images: arrRow[5].split(","),
+        marca: arrRow[4].trim().toUpperCase(),
+        images: arrRow[5].split(",").map((image) => image.replace('"', "")),
       };
 
       return product;
     });
+
     return data;
   } catch (err) {
     console.log(err);
     return [];
   }
 };
+getProducts();
