@@ -182,16 +182,24 @@ export function MainTable({ data }: { data: Product[] }) {
     pageSize: 10,
   });
   const [filteredBrand, setFilteredBrand] = React.useState("");
+  const [searchValue, setSearchValue] = React.useState("");
 
-  const brands = Array.from(new Set(data.map((item) => item.marca))).filter(
-    (el) => el !== ""
-  );
+  const brands = Array.from(new Set(data.map((item) => item.marca)))
+    .filter((el) => el !== "")
+    .sort();
 
   const filteredData = React.useMemo(() => {
     return filteredBrand
       ? data.filter((item) => item.marca === filteredBrand)
       : data;
   }, [data, filteredBrand]);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchValue(value.trim());
+    const column = isNaN(Number(searchValue)) ? "descripcion" : "referencia";
+    table.getColumn(column)?.setFilterValue(searchValue);
+  };
 
   const table = useReactTable({
     data: filteredData,
@@ -222,21 +230,8 @@ export function MainTable({ data }: { data: Product[] }) {
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Buscar..."
-          value={
-            (table.getColumn("descripcion")?.getFilterValue() as string) ??
-            (table.getColumn("referencia")?.getFilterValue() as string) ??
-            ""
-          }
-          onChange={(event) => {
-            const value = event.target.value;
-            if (isNaN(Number(value))) {
-              table
-                .getColumn("descripcion")
-                ?.setFilterValue(event.target.value);
-            } else {
-              table.getColumn("referencia")?.setFilterValue(event.target.value);
-            }
-          }}
+          value={searchValue}
+          onChange={handleInputChange}
           className="max-w-sm"
         />
         <Select value={filteredBrand} onValueChange={setFilteredBrand}>
