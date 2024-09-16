@@ -14,10 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-//import { Checkbox } from "@/components/ui/checkbox";
-
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -30,6 +27,13 @@ import {
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Product } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
@@ -54,9 +58,7 @@ export const columns: ColumnDef<Product>[] = [
           alt="product"
           width={100}
           height={100}
-          placeholder="blur"
-          blurDataURL="/imagePlaceholder.png"
-          className="rounded-lg max-h-[100px] w-auto mx-auto"
+          className="rounded-lg max-h-[100px] w-auto mx-auto "
         />
       );
     },
@@ -165,28 +167,6 @@ export const columns: ColumnDef<Product>[] = [
       );
     },
   },
-  /* {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  }, */
 ];
 
 export function MainTable({ data }: { data: Product[] }) {
@@ -197,9 +177,24 @@ export function MainTable({ data }: { data: Product[] }) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [filteredBrand, setFilteredBrand] = React.useState("");
+
+  const brands = Array.from(new Set(data.map((item) => item.marca))).filter(
+    (el) => el !== ""
+  );
+
+  const filteredData = React.useMemo(() => {
+    return filteredBrand
+      ? data.filter((item) => item.marca === filteredBrand)
+      : data;
+  }, [data, filteredBrand]);
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -209,20 +204,22 @@ export function MainTable({ data }: { data: Product[] }) {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   });
   const { pageIndex, pageSize } = table.getState().pagination;
-  const startRow = pageIndex * pageSize + 1;
+  //const startRow = pageIndex * pageSize + 1;
   const endRow = Math.min((pageIndex + 1) * pageSize, data.length);
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Buscar..."
           value={
@@ -231,10 +228,31 @@ export function MainTable({ data }: { data: Product[] }) {
             ""
           }
           onChange={(event) => {
-            table.getColumn("descripcion")?.setFilterValue(event.target.value);
+            const value = event.target.value;
+            if (isNaN(Number(value))) {
+              table
+                .getColumn("descripcion")
+                ?.setFilterValue(event.target.value);
+            } else {
+              table.getColumn("referencia")?.setFilterValue(event.target.value);
+            }
           }}
           className="max-w-sm"
         />
+        <Select value={filteredBrand} onValueChange={setFilteredBrand}>
+          <SelectTrigger className="w-[280px]">
+            <SelectValue placeholder="Filtrar por marca..." />
+          </SelectTrigger>
+          <SelectContent>
+            {brands.map((brand) => {
+              return (
+                <SelectItem key={brand} value={brand}>
+                  {brand}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -288,7 +306,9 @@ export function MainTable({ data }: { data: Product[] }) {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Mostrando {startRow} a {endRow} de {data.length} fila(s).
+          Mostrando {endRow / 10} de{" "}
+          {Math.ceil(table.getFilteredRowModel().rows.length / pageSize)}{" "}
+          pagina(s).
         </div>
         <div className="space-x-2">
           <Button

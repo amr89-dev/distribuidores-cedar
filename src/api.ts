@@ -29,4 +29,3 @@ export const getProducts = async (): Promise<Product[]> => {
     return [];
   }
 };
-getProducts();
