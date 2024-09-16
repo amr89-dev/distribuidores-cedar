@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -156,14 +156,43 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     id: "actions",
-    header: "Acciones",
+    header: "Cantidad",
     cell: ({ row }) => {
       const stock: number = row.getValue("stock");
 
       return (
-        <Button size="lg" disabled={stock <= 0}>
-          Agregar
-        </Button>
+        <div className="flex items-center space-x-2">
+          <div className="flex border border-neutral-200 rounded-md ">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {}}
+              disabled={stock <= 0}
+              className="border-none pl-2 rounded-r-none"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              value={1}
+              onChange={() => console.log("hola")}
+              className="max-w-12 border-none text-center px-0 rounded-none"
+              min="0"
+              max={stock}
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {}}
+              disabled={stock <= 0}
+              className="border-none pr-2 rounded-l-none"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button onClick={() => {}} disabled={stock <= 0}>
+            Agregar
+          </Button>
+        </div>
       );
     },
   },
