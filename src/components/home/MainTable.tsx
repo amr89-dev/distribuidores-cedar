@@ -195,7 +195,11 @@ export const createColumns = (
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <Button className="w-32" onClick={() => {}} disabled={stock <= 0}>
+          <Button
+            className="w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity"
+            onClick={() => {}}
+            disabled={stock <= 0}
+          >
             Agregar
           </Button>
         </div>
@@ -286,7 +290,7 @@ export function MainTable({ data }: { data: Product[] }) {
   console.log(quantities);
 
   return (
-    <div className="w-full" ref={tableContainerRef}>
+    <div className="w-full max-w-screen-2xl" ref={tableContainerRef}>
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Buscar..."
