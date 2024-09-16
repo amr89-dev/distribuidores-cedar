@@ -41,7 +41,10 @@ const getStockStatus = (stock: number): { text: string; color: string } => {
   return { text: "Disponible", color: "bg-green-500" };
 };
 
-export const columns: ColumnDef<Product>[] = [
+export const createColumns = (
+  handleQuantityChange: (id: string, change: number) => void,
+  quantitiesRef: React.RefObject<{ [key: string]: number }>
+): ColumnDef<Product>[] => [
   {
     accessorKey: "images",
     header: "Imagen",
@@ -159,6 +162,9 @@ export const columns: ColumnDef<Product>[] = [
     header: "Cantidad",
     cell: ({ row }) => {
       const stock: number = row.getValue("stock");
+      const referencia: string = row.getValue("referencia");
+      const quantity =
+        quantitiesRef.current !== null ? quantitiesRef.current[referencia] : 1;
 
       return (
         <div className="flex items-center space-x-2">
@@ -166,14 +172,14 @@ export const columns: ColumnDef<Product>[] = [
             <Button
               variant="outline"
               size="icon"
-              onClick={() => {}}
+              onClick={() => handleQuantityChange(referencia, -1)}
               disabled={stock <= 0}
               className="border-none pl-2 rounded-r-none"
             >
               <Minus className="h-4 w-4" />
             </Button>
             <Input
-              value={1}
+              value={quantity ?? 1}
               onChange={() => console.log("hola")}
               className="max-w-12 border-none text-center px-0 rounded-none"
               min="0"
@@ -182,14 +188,14 @@ export const columns: ColumnDef<Product>[] = [
             <Button
               variant="outline"
               size="icon"
-              onClick={() => {}}
+              onClick={() => handleQuantityChange(referencia, 1)}
               disabled={stock <= 0}
               className="border-none pr-2 rounded-l-none"
             >
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <Button onClick={() => {}} disabled={stock <= 0}>
+          <Button className="w-32" onClick={() => {}} disabled={stock <= 0}>
             Agregar
           </Button>
         </div>
@@ -212,7 +218,11 @@ export function MainTable({ data }: { data: Product[] }) {
   });
   const [filteredBrand, setFilteredBrand] = React.useState("");
   const [searchValue, setSearchValue] = React.useState("");
-
+  const [quantities, setQuantities] = React.useState<{ [key: string]: number }>(
+    {}
+  );
+  const quantitiesRef = React.useRef(quantities);
+  quantitiesRef.current = quantities;
   const brands = Array.from(new Set(data.map((item) => item.marca)))
     .filter((el) => el !== "")
     .sort();
@@ -229,6 +239,19 @@ export function MainTable({ data }: { data: Product[] }) {
     const column = isNaN(Number(searchValue)) ? "descripcion" : "referencia";
     table.getColumn(column)?.setFilterValue(searchValue);
   };
+  const handleQuantityChange = (referencia: string, change: number) => {
+    setQuantities((prev) => {
+      const newQuantity = (prev[referencia] || 1) + change;
+      return { ...prev, [referencia]: newQuantity > 0 ? newQuantity : 0 };
+    });
+  };
+
+  const columns: ColumnDef<Product>[] = createColumns(
+    handleQuantityChange,
+    quantitiesRef
+  );
+
+  const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
     data: filteredData,
@@ -241,7 +264,13 @@ export function MainTable({ data }: { data: Product[] }) {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      setPagination(updater);
+      tableContainerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    },
     state: {
       sorting,
       columnFilters,
@@ -254,8 +283,10 @@ export function MainTable({ data }: { data: Product[] }) {
   //const startRow = pageIndex * pageSize + 1;
   const endRow = Math.min((pageIndex + 1) * pageSize, data.length);
 
+  console.log(quantities);
+
   return (
-    <div className="w-full">
+    <div className="w-full" ref={tableContainerRef}>
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Buscar..."
@@ -263,20 +294,32 @@ export function MainTable({ data }: { data: Product[] }) {
           onChange={handleInputChange}
           className="max-w-sm"
         />
-        <Select value={filteredBrand} onValueChange={setFilteredBrand}>
-          <SelectTrigger className="w-[280px]">
-            <SelectValue placeholder="Filtrar por marca..." />
-          </SelectTrigger>
-          <SelectContent>
-            {brands.map((brand) => {
-              return (
-                <SelectItem key={brand} value={brand}>
-                  {brand}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center space-x-2">
+          <Select value={filteredBrand} onValueChange={setFilteredBrand}>
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Filtrar por marca..." />
+            </SelectTrigger>
+            <SelectContent>
+              {brands.map((brand) => {
+                return (
+                  <SelectItem key={brand} value={brand}>
+                    {brand}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          <Button
+            className=""
+            variant="outline"
+            onClick={() => {
+              setFilteredBrand("");
+              setSearchValue("");
+            }}
+          >
+            Limpiar
+          </Button>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
