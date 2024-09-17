@@ -34,6 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { CarouselDemo } from "./CarruDemo";
 
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
@@ -50,19 +52,27 @@ export const createColumns = (
     header: "Imagen",
     cell: ({ row }) => {
       const images = row.getValue("images") as string[];
+      console.log("-->", images);
       const firstImage =
         images && images.length > 0 && images[0] !== ""
           ? images[0]
           : "/imagePlaceholder.png";
 
       return (
-        <Image
-          src={firstImage}
-          alt="product"
-          width={100}
-          height={100}
-          className="rounded-lg max-h-[100px] w-auto mx-auto "
-        />
+        <Dialog>
+          <DialogTrigger>
+            <Image
+              src={firstImage}
+              alt="product"
+              width={100}
+              height={100}
+              className="rounded-lg max-h-[100px] w-auto mx-auto "
+            />
+          </DialogTrigger>
+          <DialogContent className="max-w-screen-sm flex flex-col justify-center items-center bg-red-500">
+            <CarouselDemo images={images} />
+          </DialogContent>
+        </Dialog>
       );
     },
   },
@@ -291,14 +301,14 @@ export function MainTable({ data }: { data: Product[] }) {
 
   return (
     <div className="w-full max-w-screen-2xl" ref={tableContainerRef}>
-      <div className="flex items-center justify-between py-4">
+      <div className="flex flex-col md:flex-row items-center justify-between py-4">
         <Input
           placeholder="Buscar..."
           value={searchValue}
           onChange={handleInputChange}
-          className="max-w-sm"
+          className="w-full md:max-w-sm"
         />
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-row items-center space-x-2 w-full md:w-auto justify-between md:justify-normal ">
           <Select value={filteredBrand} onValueChange={setFilteredBrand}>
             <SelectTrigger className="w-[280px]">
               <SelectValue placeholder="Filtrar por marca..." />
