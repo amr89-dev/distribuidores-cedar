@@ -52,7 +52,6 @@ export const createColumns = (
     header: "Imagen",
     cell: ({ row }) => {
       const images = row.getValue("images") as string[];
-      console.log("-->", images);
       const firstImage =
         images && images.length > 0 && images[0] !== ""
           ? images[0]
