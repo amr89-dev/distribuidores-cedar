@@ -36,6 +36,8 @@ import {
 } from "../ui/select";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { CarouselDemo } from "./CarruDemo";
+import { useStore } from "@/hooks/useStore";
+import { getProducts } from "@/api";
 
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
@@ -68,7 +70,7 @@ export const createColumns = (
               className="rounded-lg max-h-[100px] w-auto mx-auto "
             />
           </DialogTrigger>
-          <DialogContent className="max-w-screen-sm flex flex-col justify-center items-center bg-red-500">
+          <DialogContent>
             <CarouselDemo images={images} />
           </DialogContent>
         </Dialog>
@@ -189,7 +191,7 @@ export const createColumns = (
             </Button>
             <Input
               value={quantity ?? 1}
-              onChange={() => console.log("hola")}
+              onChange={() => alert("hola")}
               className="max-w-12 border-none text-center px-0 rounded-none"
               min="0"
               max={stock}
@@ -217,7 +219,15 @@ export const createColumns = (
   },
 ];
 
-export function MainTable({ data }: { data: Product[] }) {
+export function MainTable() {
+  const {
+    products: data,
+    setProducts,
+    applyFilters,
+    filters,
+    setBrand,
+    filteredProducts,
+  } = useStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -229,34 +239,36 @@ export function MainTable({ data }: { data: Product[] }) {
     pageIndex: 0,
     pageSize: 10,
   });
-  const [filteredBrand, setFilteredBrand] = React.useState("");
   const [searchValue, setSearchValue] = React.useState("");
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>(
     {}
   );
   const quantitiesRef = React.useRef(quantities);
   quantitiesRef.current = quantities;
+
   const brands = Array.from(new Set(data.map((item) => item.marca)))
     .filter((el) => el !== "")
     .sort();
 
-  const filteredData = React.useMemo(() => {
+  /*  const filteredData = React.useMemo(() => {
     return filteredBrand
       ? data.filter((item) => item.marca === filteredBrand)
       : data;
-  }, [data, filteredBrand]);
+  }, [data, filteredBrand]); */
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setSearchValue(value.trim());
-    const column = isNaN(Number(searchValue)) ? "descripcion" : "referencia";
-    table.getColumn(column)?.setFilterValue(searchValue);
+    setSearchValue(value);
   };
   const handleQuantityChange = (referencia: string, change: number) => {
     setQuantities((prev) => {
       const newQuantity = (prev[referencia] || 1) + change;
       return { ...prev, [referencia]: newQuantity > 0 ? newQuantity : 0 };
     });
+  };
+  const handleBrandChange = (value: string) => {
+    setBrand(value);
+    applyFilters();
   };
 
   const columns: ColumnDef<Product>[] = createColumns(
@@ -267,7 +279,7 @@ export function MainTable({ data }: { data: Product[] }) {
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
-    data: filteredData,
+    data: filteredProducts.length > 0 ? filteredProducts : data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -296,28 +308,62 @@ export function MainTable({ data }: { data: Product[] }) {
   //const startRow = pageIndex * pageSize + 1;
   const endRow = Math.min((pageIndex + 1) * pageSize, data.length);
 
-  console.log(quantities);
+  React.useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, [setProducts]);
+
+  React.useEffect(() => {
+    applyFilters();
+  }, [data, applyFilters]);
 
   return (
     <div className="w-full max-w-screen-2xl" ref={tableContainerRef}>
       <div className="flex flex-col md:flex-row items-center justify-between py-4">
-        <Input
-          placeholder="Buscar..."
-          value={searchValue}
-          onChange={handleInputChange}
-          className="w-full md:max-w-sm"
-        />
+        <div className="flex flex-row items-center space-x-2 w-full md:max-w-lg justify-between md:justify-normal">
+          <Input
+            placeholder="Buscar..."
+            value={searchValue}
+            onChange={handleInputChange}
+            className="w-full "
+          />
+          <Button
+            variant="outline"
+            onClick={() => {
+              const column = isNaN(Number(searchValue))
+                ? "descripcion"
+                : "referencia";
+              table.getColumn(column)?.setFilterValue(searchValue);
+              setSearchValue("");
+            }}
+          >
+            Buscar
+          </Button>
+        </div>
         <div className="flex flex-row items-center space-x-2 w-full md:w-auto justify-between md:justify-normal ">
-          <Select value={filteredBrand} onValueChange={setFilteredBrand}>
+          <Select value={filters.brand} onValueChange={handleBrandChange}>
             <SelectTrigger className="w-[280px]">
               <SelectValue placeholder="Filtrar por marca..." />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem key="all" value="all">
+                Todas las marcas
+              </SelectItem>
               {brands.map((brand) => {
                 return (
-                  <SelectItem key={brand} value={brand}>
-                    {brand}
-                  </SelectItem>
+                  <>
+                    <SelectItem key={brand} value={brand}>
+                      {brand}
+                    </SelectItem>
+                  </>
                 );
               })}
             </SelectContent>
@@ -326,8 +372,9 @@ export function MainTable({ data }: { data: Product[] }) {
             className=""
             variant="outline"
             onClick={() => {
-              setFilteredBrand("");
               setSearchValue("");
+              setBrand("all");
+              applyFilters();
             }}
           >
             Limpiar

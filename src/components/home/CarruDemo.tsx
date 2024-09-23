@@ -6,24 +6,24 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Image from "next/image";
 
 export function CarouselDemo({ images }: { images: string[] }) {
-  console.log(images);
   return (
-    <Carousel className="w-full max-w-xs">
+    <Carousel className="w-full border-none">
       <CarouselContent>
-        {Array.from({ length: 500 }).map((_, index) => (
+        {Array.from({ length: images.length }).map((_, index) => (
           <CarouselItem key={index}>
-            <div className="p-1">
+            <div className="p-1 bg-red-600 border-none w-full h-full">
               {images.length > 0 ? (
                 <Card>
                   <CardContent>
-                    <img
+                    <Image
                       src={images[index]}
                       alt="product"
-                      width={100}
-                      height={100}
-                      className="rounded-lg max-h-[100px] w-auto mx-auto"
+                      width={1200}
+                      height={800} // Alto original de la imagen
+                      style={{ width: "100%", height: "auto" }}
                     />
                   </CardContent>
                 </Card>
