@@ -62,13 +62,13 @@ export const createColumns = (
 
       return (
         <Dialog>
-          <DialogTrigger>
+          <DialogTrigger className="lg:min-h-[85px]  lg:min-w-[85px] ">
             <Image
               src={firstImage}
               alt="product"
               width={100}
               height={100}
-              className="rounded-lg max-h-[100px] w-auto mx-auto "
+              className="rounded-lg  w-auto mx-auto "
             />
           </DialogTrigger>
           <DialogContent>
