@@ -35,9 +35,10 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { CarouselDemo } from "./CarruDemo";
+import { Slider } from "./Slider";
 import { useStore } from "@/hooks/useStore";
 import { getProducts } from "@/api";
+import SkeletonRow from "./SekeletonRow";
 
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
@@ -71,7 +72,7 @@ export const createColumns = (
             />
           </DialogTrigger>
           <DialogContent>
-            <CarouselDemo images={images} />
+            <Slider images={images} />
           </DialogContent>
         </Dialog>
       );
@@ -228,6 +229,7 @@ export function MainTable() {
     setBrand,
     filteredProducts,
   } = useStore();
+  const [isLoading, setIsLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -249,12 +251,6 @@ export function MainTable() {
   const brands = Array.from(new Set(data.map((item) => item.marca)))
     .filter((el) => el !== "")
     .sort();
-
-  /*  const filteredData = React.useMemo(() => {
-    return filteredBrand
-      ? data.filter((item) => item.marca === filteredBrand)
-      : data;
-  }, [data, filteredBrand]); */
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -305,15 +301,17 @@ export function MainTable() {
     },
   });
   const { pageIndex, pageSize } = table.getState().pagination;
-  //const startRow = pageIndex * pageSize + 1;
   const endRow = Math.min((pageIndex + 1) * pageSize, data.length);
 
   React.useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setIsLoading(true);
         const data = await getProducts();
         setProducts(data);
+        setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
         console.error("Error fetching products:", error);
       }
     };
@@ -401,8 +399,11 @@ export function MainTable() {
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <SkeletonRow />
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

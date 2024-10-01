@@ -8,22 +8,22 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 
-export function CarouselDemo({ images }: { images: string[] }) {
+export function Slider({ images }: { images: string[] }) {
   return (
     <Carousel className="w-full border-none">
       <CarouselContent>
         {Array.from({ length: images.length }).map((_, index) => (
           <CarouselItem key={index}>
-            <div className="p-1 bg-red-600 border-none w-full h-full">
+            <div>
               {images.length > 0 ? (
-                <Card>
-                  <CardContent>
+                <Card className="border-none">
+                  <CardContent className="border-none">
                     <Image
                       src={images[index]}
                       alt="product"
                       width={1200}
-                      height={800} // Alto original de la imagen
-                      style={{ width: "100%", height: "auto" }}
+                      height={800}
+                      style={{ objectFit: "contain", border: "none" }}
                     />
                   </CardContent>
                 </Card>
