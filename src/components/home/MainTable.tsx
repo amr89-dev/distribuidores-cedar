@@ -39,6 +39,7 @@ import { Slider } from "./Slider";
 import { useStore } from "@/hooks/useStore";
 import { getProducts } from "@/api";
 import SkeletonRow from "./SekeletonRow";
+import clsx from "clsx";
 
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
@@ -242,6 +243,7 @@ export function MainTable() {
     pageSize: 10,
   });
   const [searchValue, setSearchValue] = React.useState("");
+  const [filterValue, setFilterValue] = React.useState("");
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>(
     {}
   );
@@ -266,6 +268,22 @@ export function MainTable() {
     setSearchValue("");
     setBrand(value);
     applyFilters();
+  };
+
+  const handleSearch = () => {
+    const columnHead = isNaN(Number(searchValue))
+      ? "descripcion"
+      : "referencia";
+    const column = table.getColumn(columnHead);
+    column?.setFilterValue(searchValue);
+    setFilterValue(searchValue);
+    setSearchValue("");
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && searchValue.length > 0) {
+      handleSearch();
+    }
   };
 
   const columns: ColumnDef<Product>[] = createColumns(
@@ -332,21 +350,28 @@ export function MainTable() {
             placeholder="Buscar..."
             value={searchValue}
             onChange={handleInputChange}
-            className="w-full "
+            className="w-full  "
+            onKeyDown={handleKeyDown}
           />
           <Button
             variant="outline"
-            onClick={() => {
-              const column = isNaN(Number(searchValue))
-                ? "descripcion"
-                : "referencia";
-              table.getColumn(column)?.setFilterValue(searchValue);
-              setSearchValue("");
-            }}
+            className={clsx(
+              "transition-colors duration-300 ease-in-out",
+              searchValue.length > 0 &&
+                "bg-gradient-to-r from-blue-800 to-sky-600 text-white"
+            )}
+            onClick={handleSearch}
           >
             Buscar
           </Button>
         </div>
+
+        <div className="w-full">
+          {filterValue.length > 0 && (
+            <Badge className="text-white p-2">{filterValue}</Badge>
+          )}
+        </div>
+
         <div className="flex flex-row items-center space-x-2 w-full md:w-auto justify-between md:justify-normal ">
           <Select value={filters.brand} onValueChange={handleBrandChange}>
             <SelectTrigger className="w-[280px]">
@@ -356,10 +381,10 @@ export function MainTable() {
               <SelectItem key="all" value="all">
                 Todas las marcas
               </SelectItem>
-              {brands.map((brand) => {
+              {brands.map((brand, i) => {
                 return (
                   <>
-                    <SelectItem key={brand} value={brand}>
+                    <SelectItem key={brand + i} value={brand}>
                       {brand}
                     </SelectItem>
                   </>
@@ -372,14 +397,17 @@ export function MainTable() {
             variant="outline"
             onClick={() => {
               setSearchValue("");
+              setFilterValue("");
               setBrand("all");
               applyFilters();
+              table.resetColumnFilters();
             }}
           >
-            Limpiar
+            Limpiar filtros
           </Button>
         </div>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
