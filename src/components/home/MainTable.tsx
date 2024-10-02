@@ -325,7 +325,7 @@ export function MainTable() {
 
   return (
     <div className="w-full max-w-screen-2xl" ref={tableContainerRef}>
-      <div className="flex flex-col md:flex-row items-center justify-between py-4">
+      <div className="flex flex-col gap-2 md:flex-row items-center justify-between py-4">
         <div className="flex flex-row items-center space-x-2 w-full md:max-w-lg justify-between md:justify-normal">
           <Input
             placeholder="Buscar..."
