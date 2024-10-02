@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, Minus, Plus } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Image from "next/image";
-import { Badge } from "../ui/badge";
+import { Badge } from "../../ui/badge";
 import { Product } from "@/types";
 import {
   Select,
@@ -33,23 +33,22 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+} from "../../ui/select";
+import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
 import { Slider } from "./Slider";
 import { useStore } from "@/hooks/useStore";
 import { getProducts } from "@/api";
 import SkeletonRow from "./SekeletonRow";
+import clsx from "clsx";
+import QuantitySelector from "./QuantitySelector";
 
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
-  if (stock <= 10) return { text: "Pocas unidades", color: "bg-yellow-500" };
+  if (stock <= 10) return { text: "Limitado", color: "bg-yellow-500" };
   return { text: "Disponible", color: "bg-green-500" };
 };
 
-export const createColumns = (
-  handleQuantityChange: (id: string, change: number) => void,
-  quantitiesRef: React.RefObject<{ [key: string]: number }>
-): ColumnDef<Product>[] => [
+export const createColumns = (): ColumnDef<Product>[] => [
   {
     accessorKey: "images",
     header: "Imagen",
@@ -136,10 +135,10 @@ export const createColumns = (
       </Button>
     ),
     cell: ({ row }) => {
-      const stockStatus = getStockStatus(row.getValue("stock"));
+      const stockStatus = getStockStatus(row.original.saldo);
 
       return (
-        <Badge className={`${stockStatus.color} text-white`}>
+        <Badge className={`${stockStatus.color} text-white text-nowrap`}>
           {stockStatus.text}
         </Badge>
       );
@@ -158,8 +157,6 @@ export const createColumns = (
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("precio"));
-
-      // Format the amount as a dollar amount
       const formatted = new Intl.NumberFormat("en-CO", {
         style: "currency",
         currency: "COP",
@@ -173,40 +170,12 @@ export const createColumns = (
     id: "actions",
     header: "Cantidad",
     cell: ({ row }) => {
-      const stock: number = row.getValue("stock");
+      const stock: number = row.original.saldo;
       const referencia: string = row.getValue("referencia");
-      const quantity =
-        quantitiesRef.current !== null ? quantitiesRef.current[referencia] : 1;
-
+      console.log("En actiosn", { stock });
       return (
         <div className="flex items-center space-x-2">
-          <div className="flex border border-neutral-200 rounded-md ">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleQuantityChange(referencia, -1)}
-              disabled={stock <= 0}
-              className="border-none pl-2 rounded-r-none"
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <Input
-              value={quantity ?? 1}
-              onChange={() => alert("hola")}
-              className="max-w-12 border-none text-center px-0 rounded-none"
-              min="0"
-              max={stock}
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleQuantityChange(referencia, 1)}
-              disabled={stock <= 0}
-              className="border-none pr-2 rounded-l-none"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+          <QuantitySelector maxStock={stock} sku={referencia} />
           <Button
             className="w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity"
             onClick={() => {}}
@@ -242,11 +211,7 @@ export function MainTable() {
     pageSize: 10,
   });
   const [searchValue, setSearchValue] = React.useState("");
-  const [quantities, setQuantities] = React.useState<{ [key: string]: number }>(
-    {}
-  );
-  const quantitiesRef = React.useRef(quantities);
-  quantitiesRef.current = quantities;
+  const [filterValue, setFilterValue] = React.useState("");
 
   const brands = Array.from(new Set(data.map((item) => item.marca)))
     .filter((el) => el !== "")
@@ -256,21 +221,30 @@ export function MainTable() {
     const value = event.target.value;
     setSearchValue(value);
   };
-  const handleQuantityChange = (referencia: string, change: number) => {
-    setQuantities((prev) => {
-      const newQuantity = (prev[referencia] || 1) + change;
-      return { ...prev, [referencia]: newQuantity > 0 ? newQuantity : 0 };
-    });
-  };
+
   const handleBrandChange = (value: string) => {
+    setSearchValue("");
     setBrand(value);
     applyFilters();
   };
 
-  const columns: ColumnDef<Product>[] = createColumns(
-    handleQuantityChange,
-    quantitiesRef
-  );
+  const handleSearch = () => {
+    const columnHead = isNaN(Number(searchValue))
+      ? "descripcion"
+      : "referencia";
+    const column = table.getColumn(columnHead);
+    column?.setFilterValue(searchValue);
+    setFilterValue(searchValue);
+    setSearchValue("");
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && searchValue.length > 0) {
+      handleSearch();
+    }
+  };
+
+  const columns: ColumnDef<Product>[] = createColumns();
 
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -331,21 +305,39 @@ export function MainTable() {
             placeholder="Buscar..."
             value={searchValue}
             onChange={handleInputChange}
-            className="w-full "
+            className="w-full  "
+            onKeyDown={handleKeyDown}
           />
           <Button
             variant="outline"
-            onClick={() => {
-              const column = isNaN(Number(searchValue))
-                ? "descripcion"
-                : "referencia";
-              table.getColumn(column)?.setFilterValue(searchValue);
-              setSearchValue("");
-            }}
+            className={clsx(
+              "transition-colors duration-300 ease-in-out",
+              searchValue.length > 0 &&
+                "bg-gradient-to-r from-blue-800 to-sky-600 text-white"
+            )}
+            onClick={handleSearch}
           >
             Buscar
           </Button>
         </div>
+
+        <div className="w-full">
+          {filterValue.length > 0 && (
+            <Badge className="text-white p-2">
+              {filterValue}{" "}
+              <button
+                className="ml-2"
+                onClick={() => {
+                  table.resetColumnFilters();
+                  setFilterValue("");
+                }}
+              >
+                X
+              </button>
+            </Badge>
+          )}
+        </div>
+
         <div className="flex flex-row items-center space-x-2 w-full md:w-auto justify-between md:justify-normal ">
           <Select value={filters.brand} onValueChange={handleBrandChange}>
             <SelectTrigger className="w-[280px]">
@@ -355,10 +347,10 @@ export function MainTable() {
               <SelectItem key="all" value="all">
                 Todas las marcas
               </SelectItem>
-              {brands.map((brand) => {
+              {brands.map((brand, i) => {
                 return (
                   <>
-                    <SelectItem key={brand} value={brand}>
+                    <SelectItem key={brand + i} value={brand}>
                       {brand}
                     </SelectItem>
                   </>
@@ -371,14 +363,17 @@ export function MainTable() {
             variant="outline"
             onClick={() => {
               setSearchValue("");
+              setFilterValue("");
               setBrand("all");
               applyFilters();
+              table.resetColumnFilters();
             }}
           >
-            Limpiar
+            Limpiar filtros
           </Button>
         </div>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
