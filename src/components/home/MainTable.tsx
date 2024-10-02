@@ -263,6 +263,7 @@ export function MainTable() {
     });
   };
   const handleBrandChange = (value: string) => {
+    setSearchValue("");
     setBrand(value);
     applyFilters();
   };
