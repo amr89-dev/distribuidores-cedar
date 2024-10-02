@@ -26,6 +26,8 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   const handleIncrease = () => {
     setItems({ sku: sku, quantity: items.quantity + 1 });
   };
+
+  console.log(items);
   return (
     <div className="flex items-center space-x-2">
       <div className="flex border border-neutral-200 rounded-md">
@@ -33,7 +35,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           variant="outline"
           size="icon"
           onClick={handleDecrease}
-          disabled={Number(items.quantity) >= maxStock || items.quantity <= 0}
+          disabled={items.quantity <= 0}
           className="border-none pl-2 rounded-r-none"
         >
           <Minus className="h-4 w-4" />
@@ -44,14 +46,12 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           className="max-w-12 border-none text-center px-0 rounded-none"
           min="0"
           max={maxStock}
-          disabled={Number(items.quantity) >= maxStock || items.quantity < 0}
-          type="number"
         />
         <Button
           variant="outline"
           size="icon"
           onClick={handleIncrease}
-          disabled={Number(items.sku) >= maxStock}
+          disabled={Number(items.quantity) >= maxStock}
           className="border-none pr-2 rounded-l-none"
         >
           <Plus className="h-4 w-4" />
