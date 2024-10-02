@@ -1,4 +1,4 @@
-import { MainTable } from "@/components/home/MainTable";
+import { MainTable } from "@/components/home/MainTable/MainTable";
 
 export default async function Home() {
   return (
