@@ -368,7 +368,18 @@ export function MainTable() {
 
         <div className="w-full">
           {filterValue.length > 0 && (
-            <Badge className="text-white p-2">{filterValue}</Badge>
+            <Badge className="text-white p-2">
+              {filterValue}{" "}
+              <button
+                className="ml-2"
+                onClick={() => {
+                  table.resetColumnFilters();
+                  setFilterValue("");
+                }}
+              >
+                X
+              </button>
+            </Badge>
           )}
         </div>
 
