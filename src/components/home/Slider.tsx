@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -10,23 +9,19 @@ import Image from "next/image";
 
 export function Slider({ images }: { images: string[] }) {
   return (
-    <Carousel className="w-full border-none">
+    <Carousel>
       <CarouselContent>
         {Array.from({ length: images.length }).map((_, index) => (
           <CarouselItem key={index}>
-            <div>
+            <div className="w-full h-full flex flex-col justify-center items-center ">
               {images.length > 0 ? (
-                <Card className="border-none">
-                  <CardContent className="border-none">
-                    <Image
-                      src={images[index]}
-                      alt="product"
-                      width={1200}
-                      height={800}
-                      style={{ objectFit: "contain", border: "none" }}
-                    />
-                  </CardContent>
-                </Card>
+                <Image
+                  src={images[index]}
+                  alt="product"
+                  width={1200}
+                  height={800}
+                  className="w-full"
+                />
               ) : (
                 <p>No se pudieron cargar las imágenes.</p>
               )}
