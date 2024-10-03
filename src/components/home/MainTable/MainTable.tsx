@@ -61,13 +61,13 @@ export const createColumns = (): ColumnDef<Product>[] => [
 
       return (
         <Dialog>
-          <DialogTrigger className="lg:min-h-[85px]  lg:min-w-[85px] ">
+          <DialogTrigger className="lg:min-h-[85px]  lg:min-w-[85px]  ">
             <Image
               src={firstImage}
               alt="product"
               width={100}
               height={100}
-              className="rounded-lg  w-auto mx-auto "
+              className="rounded-lg max-h-[100px] h-full w-auto mx-auto "
             />
           </DialogTrigger>
           <DialogContent>
