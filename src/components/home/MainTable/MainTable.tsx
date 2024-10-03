@@ -172,7 +172,6 @@ export const createColumns = (): ColumnDef<Product>[] => [
     cell: ({ row }) => {
       const stock: number = row.original.saldo;
       const referencia: string = row.getValue("referencia");
-      console.log("En actiosn", { stock });
       return (
         <div className="flex items-center space-x-2">
           <QuantitySelector maxStock={stock} sku={referencia} />

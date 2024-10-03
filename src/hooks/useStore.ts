@@ -1,8 +1,9 @@
-import { Product } from "@/types";
+import { CartItem, Product } from "@/types";
 import { create } from "zustand";
 
 interface StoreState {
   products: Product[];
+  shoppingCart: CartItem[];
   filteredProducts: Product[];
   filters: {
     brand: string;
@@ -15,6 +16,7 @@ interface StoreState {
 export const useStore = create<StoreState>((set) => ({
   products: [],
   filteredProducts: [],
+  shoppingCart: [],
   filters: { brand: "" },
   setProducts: (products) =>
     set(() => {
@@ -35,5 +37,21 @@ export const useStore = create<StoreState>((set) => ({
       });
 
       return { filteredProducts };
+    }),
+  addToCart: (product: CartItem) =>
+    set((state) => {
+      const itemExists = state.shoppingCart.find(
+        (item) => item.sku === product.sku
+      );
+      itemExists
+        ? state.shoppingCart.map((item) =>
+            item.sku === product.sku
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          )
+        : [...state.shoppingCart, product];
+
+      const newCart = [...state.shoppingCart, product];
+      return { shoppingCart: newCart };
     }),
 }));
