@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Minus, Plus } from "lucide-react";
+import { useStore } from "@/hooks/useStore";
+import clsx from "clsx";
 
 interface QuantitySelectorProps {
   maxStock: number;
@@ -12,22 +14,29 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   maxStock,
   sku,
 }) => {
-  const [items, setItems] = useState({ sku: "", quantity: 1 });
+  const { shoppingCart, addToCart } = useStore();
+
+  const [item, setItem] = useState({ sku: "", quantity: 0 });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setItems({ sku: sku, quantity: Number(value) ?? 1 });
+
+    setItem({
+      sku: sku,
+      quantity: Number(value) > maxStock ? maxStock : Number(value),
+    });
   };
 
   const handleDecrease = () => {
-    setItems({ sku: sku, quantity: items.quantity - 1 });
+    setItem({ sku: sku, quantity: item.quantity - 1 });
   };
 
   const handleIncrease = () => {
-    setItems({ sku: sku, quantity: items.quantity + 1 });
+    setItem({ sku: sku, quantity: item.quantity + 1 });
   };
 
-  console.log(items);
+  const isInShoppingCart = shoppingCart.find((item) => item.sku === sku);
+
   return (
     <div className="flex items-center space-x-2">
       <div className="flex border border-neutral-200 rounded-md">
@@ -35,13 +44,13 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           variant="outline"
           size="icon"
           onClick={handleDecrease}
-          disabled={items.quantity <= 0}
+          disabled={item.quantity <= 0}
           className="border-none pl-2 rounded-r-none"
         >
           <Minus className="h-4 w-4" />
         </Button>
         <Input
-          value={items.quantity}
+          value={item.quantity}
           onChange={handleInputChange}
           className="max-w-12 border-none text-center px-0 rounded-none"
           min="0"
@@ -51,12 +60,22 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           variant="outline"
           size="icon"
           onClick={handleIncrease}
-          disabled={Number(items.quantity) >= maxStock}
+          disabled={Number(item.quantity) >= maxStock}
           className="border-none pr-2 rounded-l-none"
         >
           <Plus className="h-4 w-4" />
         </Button>
       </div>
+      <Button
+        className={`w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity ${clsx(
+          isInShoppingCart?.quantity &&
+            "bg-gradient-to-r from-green-600 to-emerald-600"
+        )}`}
+        onClick={() => addToCart(item)}
+        disabled={item.quantity <= 0 || item.quantity > maxStock}
+      >
+        {isInShoppingCart ? "Agregado" : "Seleccionar"}
+      </Button>
     </div>
   );
 };

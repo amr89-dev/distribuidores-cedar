@@ -1,5 +1,5 @@
-import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
+import CartIndicator from "./CartIndicator";
 
 export default function Header() {
   return (
@@ -24,10 +24,7 @@ export default function Header() {
               </li>
             </ul>
           </nav>
-          <div className="flex items-center bg-white bg-opacity-20 rounded-full px-3 py-1">
-            <ShoppingCart className="h-5 w-5 mr-2" />
-            <span className="font-semibold">{0}</span>
-          </div>
+          <CartIndicator />
         </div>
       </div>
     </header>

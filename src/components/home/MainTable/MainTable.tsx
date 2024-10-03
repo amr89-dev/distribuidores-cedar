@@ -175,13 +175,6 @@ export const createColumns = (): ColumnDef<Product>[] => [
       return (
         <div className="flex items-center space-x-2">
           <QuantitySelector maxStock={stock} sku={referencia} />
-          <Button
-            className="w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity"
-            onClick={() => {}}
-            disabled={stock <= 0}
-          >
-            Agregar
-          </Button>
         </div>
       );
     },

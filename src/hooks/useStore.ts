@@ -11,6 +11,7 @@ interface StoreState {
   setProducts: (products: Product[]) => void;
   setBrand: (brand: string) => void;
   applyFilters: () => void;
+  addToCart: (product: CartItem) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -43,15 +44,15 @@ export const useStore = create<StoreState>((set) => ({
       const itemExists = state.shoppingCart.find(
         (item) => item.sku === product.sku
       );
+      let newCart = [];
       itemExists
-        ? state.shoppingCart.map((item) =>
+        ? (newCart = state.shoppingCart.map((item) =>
             item.sku === product.sku
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, quantity: item.quantity + product.quantity }
               : item
-          )
-        : [...state.shoppingCart, product];
+          ))
+        : (newCart = [...state.shoppingCart, product]);
 
-      const newCart = [...state.shoppingCart, product];
       return { shoppingCart: newCart };
     }),
 }));
