@@ -53,7 +53,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
     cell: ({ row }) => <div>{row.getValue("sku")}</div>,
   },
   {
-    accessorKey: "descripcion",
+    accessorKey: "description",
     header: ({ column }) => {
       return (
         <Button
@@ -65,11 +65,11 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("descripcion")}</div>,
+    cell: ({ row }) => <div>{row.getValue("description")}</div>,
   },
 
   {
-    accessorKey: "precio",
+    accessorKey: "price",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -80,7 +80,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       </Button>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("precio"));
+      const amount = parseFloat(row.getValue("price"));
       const formatted = new Intl.NumberFormat("en-CO", {
         style: "currency",
         currency: "COP",

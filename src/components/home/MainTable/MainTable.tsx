@@ -221,9 +221,7 @@ export function MainTable() {
   };
 
   const handleSearch = () => {
-    const columnHead = isNaN(Number(searchValue))
-      ? "descripcion"
-      : "referencia";
+    const columnHead = isNaN(Number(searchValue)) ? "description" : "sku";
     const column = table.getColumn(columnHead);
     column?.setFilterValue(searchValue);
     setFilterValue(searchValue);

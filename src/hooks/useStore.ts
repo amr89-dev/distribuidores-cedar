@@ -31,7 +31,7 @@ export const useStore = create<StoreState>((set) => ({
       const { brand } = state.filters;
       const filteredProducts = state.products.filter((product) => {
         const matchesBrand = brand
-          ? product.marca.toLowerCase() === brand.toLowerCase()
+          ? product.brand.toLowerCase() === brand.toLowerCase()
           : true;
 
         return matchesBrand;
@@ -48,7 +48,7 @@ export const useStore = create<StoreState>((set) => ({
       itemExists
         ? (newCart = state.shoppingCart.map((item) =>
             item.sku === product.sku
-              ? { ...item, quantity: item.quantity + product.quantity }
+              ? { ...item, quantity: item.qty + product.qty }
               : item
           ))
         : (newCart = [...state.shoppingCart, product]);
