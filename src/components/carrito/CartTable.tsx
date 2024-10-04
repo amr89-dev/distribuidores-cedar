@@ -113,12 +113,12 @@ export default function CartTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const { shoppingCart } = useStore();
+  const { shoppingCart, products } = useStore();
   const columns: ColumnDef<CartItem>[] = createColumns();
-  console.log(shoppingCart);
+  const data = products.filter((product) => product.sku in shoppingCart);
 
   const table = useReactTable({
-    data: shoppingCart,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
