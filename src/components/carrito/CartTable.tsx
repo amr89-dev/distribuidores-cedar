@@ -1,11 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -20,14 +16,10 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -39,76 +31,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Product } from "@/types";
+import { CartItem } from "@/types";
+import { ArrowUpDown } from "lucide-react";
+import QuantitySelector from "../home/MainTable/QuantitySelector";
+import { useStore } from "@/hooks/useStore";
 
-const data: Payment[] = [
+export const createColumns = (): ColumnDef<CartItem>[] => [
   {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@yahoo.com",
-  },
-  {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@gmail.com",
-  },
-  {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@gmail.com",
-  },
-  {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@gmail.com",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@hotmail.com",
-  },
-];
-
-export type Payment = {
-  id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
-};
-
-export const createColumns = (): ColumnDef<Product>[] => [
-  {
-    accessorKey: "images",
-    header: "Imagen",
-    cell: ({ row }) => {
-      const images = row.getValue("images") as string[];
-      const firstImage =
-        images && images.length > 0 && images[0] !== ""
-          ? images[0]
-          : "/imagePlaceholder.png";
-
+    accessorKey: "sku",
+    header: ({ column }) => {
       return (
-        <Dialog>
-          <DialogTrigger className="lg:min-h-[85px]  lg:min-w-[85px]  ">
-            <Image
-              src={firstImage}
-              alt="product"
-              width={100}
-              height={100}
-              className="rounded-lg max-h-[100px] h-full w-auto mx-auto "
-            />
-          </DialogTrigger>
-          <DialogContent>
-            <Slider images={images} />
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Referencia
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
       );
     },
+    cell: ({ row }) => <div>{row.getValue("sku")}</div>,
   },
   {
     accessorKey: "descripcion",
@@ -125,58 +67,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
     },
     cell: ({ row }) => <div>{row.getValue("descripcion")}</div>,
   },
-  {
-    accessorKey: "referencia",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Referencia
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("referencia")}</div>,
-  },
-  {
-    accessorKey: "marca",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Marca
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("marca")}</div>,
-  },
 
-  {
-    accessorKey: "stock",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Stock
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const stockStatus = getStockStatus(row.original.saldo);
-
-      return (
-        <Badge className={`${stockStatus.color} text-white text-nowrap`}>
-          {stockStatus.text}
-        </Badge>
-      );
-    },
-  },
   {
     accessorKey: "precio",
     header: ({ column }) => (
@@ -203,7 +94,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
     id: "actions",
     header: "Cantidad",
     cell: ({ row }) => {
-      const stock: number = row.original.saldo;
+      const stock: number = row.original.qty;
       const referencia: string = row.getValue("referencia");
       return (
         <div className="flex items-center space-x-2">
@@ -222,9 +113,12 @@ export default function CartTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const { shoppingCart } = useStore();
+  const columns: ColumnDef<CartItem>[] = createColumns();
+  console.log(shoppingCart);
 
   const table = useReactTable({
-    data,
+    data: shoppingCart,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

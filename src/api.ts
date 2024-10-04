@@ -12,17 +12,17 @@ export const getProducts = async (): Promise<Product[]> => {
     const data: Product[] = arrProduct.map((row) => {
       const arrRow = row.split(",");
       const product: Product = {
-        referencia: arrRow[0].trim(),
-        descripcion: arrRow[1].trim(),
-        precio: Number(arrRow[2]),
-        saldo: Number(arrRow[3]),
-        marca: arrRow[4].trim().toUpperCase(),
+        sku: arrRow[0].trim(),
+        description: arrRow[1].trim(),
+        price: Number(arrRow[2]),
+        stock: Number(arrRow[3]),
+        brand: arrRow[4].trim().toUpperCase(),
         images: arrRow[5].split(";").map((image) => image.replace('"', "")),
       };
       return product;
     });
 
-    return data.sort((a, b) => b.referencia.localeCompare(a.referencia));
+    return data.sort((a, b) => b.sku.localeCompare(a.sku));
   } catch (err) {
     console.log(err);
     return [];

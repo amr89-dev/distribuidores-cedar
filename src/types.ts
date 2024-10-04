@@ -1,14 +1,12 @@
 export interface Product {
-  referencia: string;
-  marca: string;
-  descripcion: string;
-  precio: number;
-  saldo: number;
-
+  sku: string;
+  brand: string;
+  description: string;
+  price: number;
+  stock: number;
   images?: string[];
 }
 
-export interface CartItem {
-  sku: string;
-  quantity: number;
+export interface CartItem extends Pick<Product, "sku"> {
+  qty: number;
 }

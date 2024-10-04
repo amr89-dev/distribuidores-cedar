@@ -8,31 +8,33 @@ import clsx from "clsx";
 interface QuantitySelectorProps {
   maxStock: number;
   sku: string;
+  flag?: boolean;
 }
 
 const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   maxStock,
   sku,
+  flag,
 }) => {
   const { shoppingCart, addToCart } = useStore();
 
-  const [item, setItem] = useState({ sku: "", quantity: 0 });
+  const [item, setItem] = useState({ sku: "", qty: 0 });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
 
     setItem({
       sku: sku,
-      quantity: Number(value) > maxStock ? maxStock : Number(value),
+      qty: Number(value) > maxStock ? maxStock : Number(value),
     });
   };
 
   const handleDecrease = () => {
-    setItem({ sku: sku, quantity: item.quantity - 1 });
+    setItem({ sku: sku, qty: item.qty - 1 });
   };
 
   const handleIncrease = () => {
-    setItem({ sku: sku, quantity: item.quantity + 1 });
+    setItem({ sku: sku, qty: item.qty + 1 });
   };
 
   const isInShoppingCart = shoppingCart.find((item) => item.sku === sku);
@@ -44,13 +46,13 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           variant="outline"
           size="icon"
           onClick={handleDecrease}
-          disabled={item.quantity <= 0}
+          disabled={item.qty <= 0}
           className="border-none pl-2 rounded-r-none"
         >
           <Minus className="h-4 w-4" />
         </Button>
         <Input
-          value={item.quantity}
+          value={item.qty}
           onChange={handleInputChange}
           className="max-w-12 border-none text-center px-0 rounded-none"
           min="0"
@@ -60,22 +62,24 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           variant="outline"
           size="icon"
           onClick={handleIncrease}
-          disabled={Number(item.quantity) >= maxStock}
+          disabled={Number(item.qty) >= maxStock}
           className="border-none pr-2 rounded-l-none"
         >
           <Plus className="h-4 w-4" />
         </Button>
       </div>
-      <Button
-        className={`w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity ${clsx(
-          isInShoppingCart?.quantity &&
-            "bg-gradient-to-r from-green-600 to-emerald-600"
-        )}`}
-        onClick={() => addToCart(item)}
-        disabled={item.quantity <= 0 || item.quantity > maxStock}
-      >
-        {isInShoppingCart ? "Agregado" : "Seleccionar"}
-      </Button>
+      {flag && (
+        <Button
+          className={`w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity ${clsx(
+            isInShoppingCart?.qty &&
+              "bg-gradient-to-r from-green-600 to-emerald-600"
+          )}`}
+          onClick={() => addToCart(item)}
+          disabled={item.qty <= 0 || item.qty > maxStock}
+        >
+          {isInShoppingCart ? "Agregado" : "Seleccionar"}
+        </Button>
+      )}
     </div>
   );
 };

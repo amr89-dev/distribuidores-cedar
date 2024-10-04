@@ -78,7 +78,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
     },
   },
   {
-    accessorKey: "descripcion",
+    accessorKey: "description",
     header: ({ column }) => {
       return (
         <Button
@@ -90,10 +90,10 @@ export const createColumns = (): ColumnDef<Product>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("descripcion")}</div>,
+    cell: ({ row }) => <div>{row.getValue("description")}</div>,
   },
   {
-    accessorKey: "referencia",
+    accessorKey: "sku",
     header: ({ column }) => {
       return (
         <Button
@@ -105,10 +105,10 @@ export const createColumns = (): ColumnDef<Product>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("referencia")}</div>,
+    cell: ({ row }) => <div>{row.getValue("sku")}</div>,
   },
   {
-    accessorKey: "marca",
+    accessorKey: "brand",
     header: ({ column }) => {
       return (
         <Button
@@ -120,7 +120,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("marca")}</div>,
+    cell: ({ row }) => <div>{row.getValue("brand")}</div>,
   },
 
   {
@@ -135,7 +135,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
       </Button>
     ),
     cell: ({ row }) => {
-      const stockStatus = getStockStatus(row.original.saldo);
+      const stockStatus = getStockStatus(row.original.stock);
 
       return (
         <Badge className={`${stockStatus.color} text-white text-nowrap`}>
@@ -145,7 +145,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
     },
   },
   {
-    accessorKey: "precio",
+    accessorKey: "price",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -156,7 +156,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
       </Button>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("precio"));
+      const amount = parseFloat(row.getValue("price"));
       const formatted = new Intl.NumberFormat("en-CO", {
         style: "currency",
         currency: "COP",
@@ -170,11 +170,11 @@ export const createColumns = (): ColumnDef<Product>[] => [
     id: "actions",
     header: "Cantidad",
     cell: ({ row }) => {
-      const stock: number = row.original.saldo;
-      const referencia: string = row.getValue("referencia");
+      const stock: number = row.original.stock;
+      const referencia: string = row.getValue("sku");
       return (
         <div className="flex items-center space-x-2">
-          <QuantitySelector maxStock={stock} sku={referencia} />
+          <QuantitySelector maxStock={stock} sku={referencia} flag={true} />
         </div>
       );
     },
@@ -205,7 +205,7 @@ export function MainTable() {
   const [searchValue, setSearchValue] = React.useState("");
   const [filterValue, setFilterValue] = React.useState("");
 
-  const brands = Array.from(new Set(data.map((item) => item.marca)))
+  const brands = Array.from(new Set(data.map((item) => item.brand)))
     .filter((el) => el !== "")
     .sort();
 
