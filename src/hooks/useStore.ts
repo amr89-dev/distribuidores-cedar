@@ -12,6 +12,7 @@ interface StoreState {
   setBrand: (brand: string) => void;
   applyFilters: () => void;
   addToCart: (product: CartItem) => void;
+  removeFromCart: (sku: string, all: boolean) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -48,10 +49,27 @@ export const useStore = create<StoreState>((set) => ({
       itemExists
         ? (newCart = state.shoppingCart.map((item) =>
             item.sku === product.sku
-              ? { ...item, quantity: item.qty + product.qty }
+              ? { ...item, qty: item.qty + product.qty }
               : item
           ))
         : (newCart = [...state.shoppingCart, product]);
+
+      return { shoppingCart: newCart };
+    }),
+  removeFromCart: (sku, all) =>
+    set((state) => {
+      let newCart: CartItem[] = [];
+      if (all) {
+        newCart = state.shoppingCart.filter((item) => item.sku !== sku);
+      }
+
+      const itemToDelete = state.shoppingCart.find((item) => item.sku === sku);
+
+      itemToDelete && itemToDelete?.qty > 1
+        ? (newCart = state.shoppingCart.map((item) =>
+            item.sku === sku ? { ...item, qty: item.qty - 1 } : item
+          ))
+        : (newCart = state.shoppingCart.filter((item) => item.sku !== sku));
 
       return { shoppingCart: newCart };
     }),

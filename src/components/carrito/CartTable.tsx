@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -16,13 +15,7 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+
 import {
   Table,
   TableBody,
@@ -50,7 +43,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("sku")}</div>,
+    cell: ({ row }) => <div>{row.getValue("sku") ?? ""}</div>,
   },
   {
     accessorKey: "description",
@@ -65,7 +58,9 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("description")}</div>,
+    cell: ({ row }) => {
+      return <div>{row.getValue("description") ?? ""}</div>;
+    },
   },
 
   {
@@ -87,15 +82,15 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
         maximumSignificantDigits: 2,
       }).format(amount);
 
-      return <div className="">{formatted}</div>;
+      return <div className="">{formatted ?? 0}</div>;
     },
   },
   {
     id: "actions",
     header: "Cantidad",
     cell: ({ row }) => {
-      const stock: number = row.original.qty;
-      const referencia: string = row.getValue("referencia");
+      const stock: number = row.original.stock ?? 0;
+      const referencia: string = row.getValue("sku");
       return (
         <div className="flex items-center space-x-2">
           <QuantitySelector maxStock={stock} sku={referencia} />
@@ -106,6 +101,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
 ];
 
 export default function CartTable() {
+  const { shoppingCart, products } = useStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -113,12 +109,25 @@ export default function CartTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const { shoppingCart, products } = useStore();
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 5,
+  });
   const columns: ColumnDef<CartItem>[] = createColumns();
-  const data = products.filter((product) => product.sku in shoppingCart);
+
+  const data: CartItem[] = shoppingCart.map((item) => {
+    const product = products.find((product) => product.sku === item.sku);
+    return {
+      sku: item.sku,
+      description: product?.description,
+      price: product?.price,
+      stock: product?.stock,
+      qty: item.qty,
+    };
+  });
 
   const table = useReactTable({
-    data: data,
+    data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -128,52 +137,22 @@ export default function CartTable() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: (updater) => {
+      setPagination(updater);
+      table.resetColumnFilters();
+    },
+
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   });
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -217,7 +196,7 @@ export default function CartTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No hay nada en el carrito.
                 </TableCell>
               </TableRow>
             )}
@@ -225,10 +204,6 @@ export default function CartTable() {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
         <div className="space-x-2">
           <Button
             variant="outline"
@@ -236,7 +211,7 @@ export default function CartTable() {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             variant="outline"
@@ -244,7 +219,7 @@ export default function CartTable() {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Siguiente
           </Button>
         </div>
       </div>
