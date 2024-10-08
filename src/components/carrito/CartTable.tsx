@@ -3,13 +3,9 @@
 import * as React from "react";
 import {
   ColumnDef,
-  ColumnFiltersState,
   SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -85,6 +81,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       return <div className="">{formatted ?? 0}</div>;
     },
   },
+
   {
     id: "actions",
     header: "Cantidad",
@@ -98,61 +95,66 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       );
     },
   },
+  {
+    accessorKey: "totalPrice",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Precio Total
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("price"));
+      const qty = row.original.qty;
+      const totalAmount = amount * qty;
+      const formatted = new Intl.NumberFormat("en-CO", {
+        style: "currency",
+        currency: "COP",
+        maximumSignificantDigits: 2,
+      }).format(totalAmount);
+
+      return <div className="">{formatted ?? 0}</div>;
+    },
+  },
 ];
 
 export default function CartTable() {
   const { shoppingCart, products } = useStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 5,
-  });
+  [];
+
   const columns: ColumnDef<CartItem>[] = createColumns();
 
-  const data: CartItem[] = shoppingCart.map((item) => {
-    const product = products.find((product) => product.sku === item.sku);
-    return {
-      sku: item.sku,
-      description: product?.description,
-      price: product?.price,
-      stock: product?.stock,
-      qty: item.qty,
-    };
-  });
+  const data = React.useMemo(() => {
+    return shoppingCart.map((item) => {
+      const product = products.find((product) => product.sku === item.sku);
+      return {
+        sku: item.sku,
+        description: product?.description,
+        price: product?.price,
+        stock: product?.stock,
+        qty: item.qty,
+      };
+    });
+  }, [shoppingCart, products]);
 
   const table = useReactTable({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onPaginationChange: (updater) => {
-      setPagination(updater);
-      table.resetColumnFilters();
-    },
 
     state: {
       sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      pagination,
     },
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-screen-2xl">
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -202,26 +204,6 @@ export default function CartTable() {
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Siguiente
-          </Button>
-        </div>
       </div>
     </div>
   );
