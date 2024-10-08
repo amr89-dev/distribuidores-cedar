@@ -5,10 +5,10 @@ import clsx from "clsx";
 import { useState } from "react";
 
 type fakeClient = {
-  docId: string;
-  name: string;
-  phone: string;
-  email: string;
+  docId?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
 };
 
 const fakeData: fakeClient[] = [
@@ -46,6 +46,14 @@ export default function CheckoutForm() {
     }, 1000);
   };
 
+  const handleCustomerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomer({ ...customer, [event.target.name]: event.target.value });
+  };
+
+  const handleSubmit = () => {
+    alert(JSON.stringify(customer, null, 2));
+  };
+
   return (
     <div className="w-full max-w-md h-auto top-0">
       <div className="sticky top-0  flex flex-col gap-2  bg-white">
@@ -75,6 +83,7 @@ export default function CheckoutForm() {
             name="name"
             placeholder="Nombre de la empresa"
             value={customer?.name}
+            onChange={handleCustomerChange}
           />
 
           <Input
@@ -82,6 +91,7 @@ export default function CheckoutForm() {
             name="phone"
             placeholder="Número de teléfono"
             value={customer?.phone}
+            onChange={handleCustomerChange}
           />
 
           <Input
@@ -89,12 +99,14 @@ export default function CheckoutForm() {
             name="email"
             placeholder="Email"
             value={customer?.email}
+            onChange={handleCustomerChange}
           />
         </div>
       </div>
       <Button
         variant="outline"
         className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white"
+        onClick={handleSubmit}
       >
         Confirmar
       </Button>
