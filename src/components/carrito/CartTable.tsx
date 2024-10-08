@@ -107,8 +107,8 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       </Button>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("price"));
-      const qty = row.original.qty;
+      const amount = parseFloat(row.getValue("price")) ?? 0;
+      const qty = row.original.qty ?? 0;
       const totalAmount = amount * qty;
       const formatted = new Intl.NumberFormat("en-CO", {
         style: "currency",
@@ -128,7 +128,7 @@ export default function CartTable() {
 
   const columns: ColumnDef<CartItem>[] = createColumns();
 
-  const data = React.useMemo(() => {
+  const data: CartItem[] = React.useMemo(() => {
     return shoppingCart.map((item) => {
       const product = products.find((product) => product.sku === item.sku);
       return {
