@@ -13,14 +13,14 @@ export function Slider({ images }: { images: string[] }) {
       <CarouselContent>
         {Array.from({ length: images.length }).map((_, index) => (
           <CarouselItem key={index}>
-            <div className="w-full h-full flex flex-col justify-center items-center ">
+            <div className="w-full h-full max-h-[90vh] flex flex-col justify-center items-center ">
               {images.length > 0 ? (
                 <Image
                   src={images[index]}
                   alt="product"
                   width={1200}
                   height={800}
-                  className="w-full"
+                  className="h-full w-auto  object-contain"
                 />
               ) : (
                 <p>No se pudieron cargar las imágenes.</p>

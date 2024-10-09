@@ -1,7 +1,7 @@
 import { Product } from "./types";
 
 const DB_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTkYz0iVYgxyWW1Tri52FoFUx2OiUHy_Z_EhwuVXJAgCMXDhsFDTXqe3XyvdvKlccA_tGuypgPa_5Ig/pub?gid=1739840490&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGJc9SkZ2tWcF9d5tEHQT4DjfMXTQrPETmypesiFn2cyFpnAWY7jQ76DXhnV_8aI2wW80W-142aoOA/pub?gid=789871611&single=true&output=csv";
 
 export const getProducts = async (): Promise<Product[]> => {
   try {
@@ -12,17 +12,17 @@ export const getProducts = async (): Promise<Product[]> => {
     const data: Product[] = arrProduct.map((row) => {
       const arrRow = row.split(",");
       const product: Product = {
-        referencia: arrRow[0].trim(),
-        descripcion: arrRow[1].trim(),
-        precio: Number(arrRow[2]),
-        saldo: Number(arrRow[3]),
-        marca: arrRow[4].trim().toUpperCase(),
+        sku: arrRow[0].trim(),
+        description: arrRow[1].trim(),
+        price: Number(arrRow[2]),
+        stock: Number(arrRow[3]),
+        brand: arrRow[4].trim().toUpperCase(),
         images: arrRow[5].split(";").map((image) => image.replace('"', "")),
       };
       return product;
     });
 
-    return data.sort((a, b) => b.referencia.localeCompare(a.referencia));
+    return data.sort((a, b) => b.sku.localeCompare(a.sku));
   } catch (err) {
     console.log(err);
     return [];

@@ -11,6 +11,8 @@ interface StoreState {
   setProducts: (products: Product[]) => void;
   setBrand: (brand: string) => void;
   applyFilters: () => void;
+  addToCart: (product: CartItem) => void;
+  removeFromCart: (sku: string, all: boolean) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -30,7 +32,7 @@ export const useStore = create<StoreState>((set) => ({
       const { brand } = state.filters;
       const filteredProducts = state.products.filter((product) => {
         const matchesBrand = brand
-          ? product.marca.toLowerCase() === brand.toLowerCase()
+          ? product.brand.toLowerCase() === brand.toLowerCase()
           : true;
 
         return matchesBrand;
@@ -43,15 +45,32 @@ export const useStore = create<StoreState>((set) => ({
       const itemExists = state.shoppingCart.find(
         (item) => item.sku === product.sku
       );
+      let newCart = [];
       itemExists
-        ? state.shoppingCart.map((item) =>
+        ? (newCart = state.shoppingCart.map((item) =>
             item.sku === product.sku
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, qty: item.qty + product.qty }
               : item
-          )
-        : [...state.shoppingCart, product];
+          ))
+        : (newCart = [...state.shoppingCart, product]);
 
-      const newCart = [...state.shoppingCart, product];
+      return { shoppingCart: newCart };
+    }),
+  removeFromCart: (sku, all) =>
+    set((state) => {
+      let newCart: CartItem[] = [];
+      if (all) {
+        newCart = state.shoppingCart.filter((item) => item.sku !== sku);
+      }
+
+      const itemToDelete = state.shoppingCart.find((item) => item.sku === sku);
+
+      itemToDelete && itemToDelete?.qty > 1
+        ? (newCart = state.shoppingCart.map((item) =>
+            item.sku === sku ? { ...item, qty: item.qty - 1 } : item
+          ))
+        : (newCart = state.shoppingCart.filter((item) => item.sku !== sku));
+
       return { shoppingCart: newCart };
     }),
 }));
