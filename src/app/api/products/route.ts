@@ -4,7 +4,7 @@ import { NextResponse as res } from "next/server";
 const DB_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGJc9SkZ2tWcF9d5tEHQT4DjfMXTQrPETmypesiFn2cyFpnAWY7jQ76DXhnV_8aI2wW80W-142aoOA/pub?gid=789871611&single=true&output=csv";
 
-export const getProducts = async (): Promise<Product[]> => {
+async function getProducts(): Promise<Product[]> {
   try {
     const response = await fetch(DB_URL);
     const resText = await response.text();
@@ -28,7 +28,7 @@ export const getProducts = async (): Promise<Product[]> => {
     console.log(err);
     return [];
   }
-};
+}
 
 export async function GET() {
   try {
