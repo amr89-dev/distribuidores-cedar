@@ -37,7 +37,6 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
 import { Slider } from "./Slider";
 import { useStore } from "@/hooks/useStore";
-import { getProducts } from "@/api";
 import SkeletonRow from "./SekeletonRow";
 import clsx from "clsx";
 import QuantitySelector from "./QuantitySelector";
@@ -271,7 +270,11 @@ export function MainTable() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const data = await getProducts();
+        const res = await fetch("/api/products");
+        if (!res.ok) {
+          throw new Error("Failed to fetch products");
+        }
+        const data = await res.json();
         setProducts(data);
         setIsLoading(false);
       } catch (error) {

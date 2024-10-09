@@ -60,7 +60,7 @@ export default function CheckoutForm() {
         <div className="flex flex-row justify-between gap-2">
           <Input
             type="text"
-            name="dealer"
+            name="dealerId"
             placeholder="Introduce el nit de la empresa"
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
