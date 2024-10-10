@@ -1,10 +1,12 @@
 import { Product } from "@/types";
 import { NextResponse as res } from "next/server";
+import { unstable_noStore as noStore } from "next/cache";
 
 const DB_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGJc9SkZ2tWcF9d5tEHQT4DjfMXTQrPETmypesiFn2cyFpnAWY7jQ76DXhnV_8aI2wW80W-142aoOA/pub?gid=789871611&single=true&output=csv";
 
 async function getProducts(): Promise<Product[]> {
+  noStore();
   try {
     const response = await fetch(DB_URL);
     const resText = await response.text();
@@ -23,7 +25,7 @@ async function getProducts(): Promise<Product[]> {
       return product;
     });
 
-    return data.sort((a, b) => b.sku.localeCompare(a.sku)).slice(0, 10);
+    return data.sort((a, b) => b.sku.localeCompare(a.sku));
   } catch (err) {
     console.log(err);
     return [];
