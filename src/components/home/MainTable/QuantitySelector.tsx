@@ -17,12 +17,10 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   flag,
 }) => {
   const { shoppingCart, addToCart, removeFromCart } = useStore();
-
   const [item, setItem] = useState({ sku: "", qty: 0 });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-
     setItem({
       sku: sku,
       qty: Number(value) > maxStock ? maxStock : Number(value),

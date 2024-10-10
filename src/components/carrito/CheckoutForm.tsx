@@ -32,6 +32,12 @@ export default function CheckoutForm() {
     alert(JSON.stringify(customer, null, 2));
   };
 
+  const formatted = new Intl.NumberFormat("en-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumSignificantDigits: 2,
+  }).format(0);
+
   return (
     <div className="w-full max-w-md h-auto  top-0">
       <h2 className="text-xl font-bold mb-2">Datos del cliente:</h2>
@@ -81,9 +87,8 @@ export default function CheckoutForm() {
             onChange={handleCustomerChange}
           />
         </div>
-        <div>
-          <p>Subtotal: $1000</p>
-          <p>Descuento: 10%</p>
+        <div className="w-full mt-4 flex flex-col gap-2">
+          <p className="text-2xl font-bold text-end">Subtotal: {formatted}</p>
         </div>
         <Button
           variant="outline"
