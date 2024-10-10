@@ -159,7 +159,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
       const formatted = new Intl.NumberFormat("en-CO", {
         style: "currency",
         currency: "COP",
-        maximumSignificantDigits: 2,
+        maximumFractionDigits: 0,
       }).format(amount);
 
       return <div className="">{formatted}</div>;
