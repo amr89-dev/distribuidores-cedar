@@ -5,45 +5,30 @@ import clsx from "clsx";
 import { useState } from "react";
 
 type fakeClient = {
-  docId?: string;
+  doc_id?: string;
   name?: string;
   phone?: string;
   email?: string;
+  type?: string;
 };
-
-const fakeData: fakeClient[] = [
-  {
-    docId: "1",
-    name: "Empresa 1",
-    phone: "123456789",
-    email: "empresa1@example.com",
-  },
-  {
-    docId: "2",
-    name: "Empresa 2",
-    phone: "987654321",
-    email: "empresa2@example.com",
-  },
-  {
-    docId: "3",
-    name: "Empresa 3",
-    phone: "555555555",
-    email: "empresa3@example.com",
-  },
-];
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [customer, setCustomer] = useState<fakeClient>();
 
   const handleSearch = async () => {
-    setTimeout(() => {
-      const res = fakeData.filter((item) => item.docId === searchValue);
-
-      if (res.length > 0) {
-        setCustomer(res[0]);
+    try {
+      const res = await fetch(`/api/customers?docid=${searchValue}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch customer");
       }
-    }, 1000);
+      const data = await res.json();
+      if (data.length > 0) {
+        setCustomer(data[0]);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleCustomerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
