@@ -40,11 +40,10 @@ export default function CheckoutForm() {
     maximumFractionDigits: 0,
   }).format(totalCartAmount);
 
-  console.log(totalCartAmount);
   return (
     <div className="w-full max-w-md h-auto  top-0">
-      <h2 className="text-xl font-bold mb-2">Datos del cliente:</h2>
       <div className=" sticky top-0  flex flex-col gap-2 bg-white ">
+        <h2 className="text-xl font-bold ">Datos del cliente:</h2>
         <div className="flex flex-row justify-between gap-2">
           <Input
             type="text"
