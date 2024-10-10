@@ -7,6 +7,6 @@ export interface Product {
   images?: string[];
 }
 
-export interface CartItem extends Pick<Product, "sku"> {
+export interface CartItem extends Partial<Product> {
   qty: number;
 }

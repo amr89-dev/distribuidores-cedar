@@ -16,7 +16,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   sku,
   flag,
 }) => {
-  const { shoppingCart, addToCart } = useStore();
+  const { shoppingCart, addToCart, removeFromCart } = useStore();
 
   const [item, setItem] = useState({ sku: "", qty: 0 });
 
@@ -45,14 +45,22 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         <Button
           variant="outline"
           size="icon"
-          onClick={handleDecrease}
-          disabled={item.qty <= 0}
+          onClick={
+            isInShoppingCart
+              ? () => {
+                  removeFromCart(isInShoppingCart.sku as string, false);
+                }
+              : handleDecrease
+          }
+          disabled={
+            isInShoppingCart ? isInShoppingCart.qty <= 0 : item.qty <= 0
+          }
           className="border-none pl-2 rounded-r-none"
         >
           <Minus className="h-4 w-4" />
         </Button>
         <Input
-          value={item.qty}
+          value={isInShoppingCart ? isInShoppingCart.qty : item.qty}
           onChange={handleInputChange}
           className="max-w-12 border-none text-center px-0 rounded-none"
           min="0"
@@ -61,8 +69,21 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         <Button
           variant="outline"
           size="icon"
-          onClick={handleIncrease}
-          disabled={Number(item.qty) >= maxStock}
+          onClick={
+            isInShoppingCart
+              ? () => {
+                  addToCart({
+                    sku: isInShoppingCart.sku,
+                    qty: 1,
+                  });
+                }
+              : handleIncrease
+          }
+          disabled={
+            isInShoppingCart
+              ? isInShoppingCart.qty >= maxStock
+              : Number(item.qty) >= maxStock
+          }
           className="border-none pr-2 rounded-l-none"
         >
           <Plus className="h-4 w-4" />

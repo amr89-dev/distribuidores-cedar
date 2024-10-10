@@ -1,28 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
-  ColumnFiltersState,
   SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+
 import {
   Table,
   TableBody,
@@ -50,7 +39,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("sku")}</div>,
+    cell: ({ row }) => <div>{row.getValue("sku") ?? ""}</div>,
   },
   {
     accessorKey: "description",
@@ -65,7 +54,9 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("description")}</div>,
+    cell: ({ row }) => {
+      return <div>{row.getValue("description") ?? ""}</div>;
+    },
   },
 
   {
@@ -87,15 +78,16 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
         maximumSignificantDigits: 2,
       }).format(amount);
 
-      return <div className="">{formatted}</div>;
+      return <div className="">{formatted ?? 0}</div>;
     },
   },
+
   {
     id: "actions",
     header: "Cantidad",
     cell: ({ row }) => {
-      const stock: number = row.original.qty;
-      const referencia: string = row.getValue("referencia");
+      const stock: number = row.original.stock ?? 0;
+      const referencia: string = row.getValue("sku");
       return (
         <div className="flex items-center space-x-2">
           <QuantitySelector maxStock={stock} sku={referencia} />
@@ -103,77 +95,66 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       );
     },
   },
+  {
+    accessorKey: "totalPrice",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Precio Total
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("price")) ?? 0;
+      const qty = row.original.qty ?? 0;
+      const totalAmount = amount * qty;
+      const formatted = new Intl.NumberFormat("en-CO", {
+        style: "currency",
+        currency: "COP",
+        maximumSignificantDigits: 2,
+      }).format(totalAmount);
+
+      return <div className="">{formatted ?? 0}</div>;
+    },
+  },
 ];
 
 export default function CartTable() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
   const { shoppingCart, products } = useStore();
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  [];
+
   const columns: ColumnDef<CartItem>[] = createColumns();
-  const data = products.filter((product) => product.sku in shoppingCart);
+
+  const data: CartItem[] = React.useMemo(() => {
+    return shoppingCart.map((item) => {
+      const product = products.find((product) => product.sku === item.sku);
+      return {
+        sku: item.sku,
+        description: product?.description,
+        price: product?.price,
+        stock: product?.stock,
+        qty: item.qty,
+      };
+    });
+  }, [shoppingCart, products]);
 
   const table = useReactTable({
-    data: data,
+    data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+
     state: {
       sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
     },
   });
 
   return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="w-full max-w-screen-2xl">
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -217,36 +198,12 @@ export default function CartTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No hay nada en el carrito.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
       </div>
     </div>
   );
