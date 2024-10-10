@@ -155,6 +155,7 @@ export default function CartTable() {
 
   return (
     <div className="w-full max-w-screen-2xl">
+      <h2 className="text-xl font-bold mb-2">Detalle del pedido:</h2>
       <div className="rounded-md border">
         <Table>
           <TableHeader>

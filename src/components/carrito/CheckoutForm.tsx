@@ -3,18 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { useState } from "react";
-
-type fakeClient = {
-  doc_id?: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  type?: string;
-};
+import { Customer } from "@/types";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
-  const [customer, setCustomer] = useState<fakeClient>();
+  const [customer, setCustomer] = useState<Customer>();
 
   const handleSearch = async () => {
     try {
@@ -40,8 +33,9 @@ export default function CheckoutForm() {
   };
 
   return (
-    <div className="w-full max-w-md h-auto top-0">
-      <div className="sticky top-0  flex flex-col gap-2  bg-white">
+    <div className="w-full max-w-md h-auto  top-0">
+      <h2 className="text-xl font-bold mb-2">Datos del cliente:</h2>
+      <div className=" sticky top-0  flex flex-col gap-2 bg-white ">
         <div className="flex flex-row justify-between gap-2">
           <Input
             type="text"
@@ -87,14 +81,18 @@ export default function CheckoutForm() {
             onChange={handleCustomerChange}
           />
         </div>
+        <div>
+          <p>Subtotal: $1000</p>
+          <p>Descuento: 10%</p>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white"
+          onClick={handleSubmit}
+        >
+          Confirmar Pedido
+        </Button>
       </div>
-      <Button
-        variant="outline"
-        className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white"
-        onClick={handleSubmit}
-      >
-        Confirmar
-      </Button>
     </div>
   );
 }

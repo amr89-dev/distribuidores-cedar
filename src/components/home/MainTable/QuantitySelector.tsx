@@ -93,10 +93,12 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         <Button
           className={`w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity ${clsx(
             isInShoppingCart?.qty &&
-              "bg-gradient-to-r from-green-600 to-emerald-600"
+              "bg-gradient-to-r from-green-600 to-emerald-600  "
           )}`}
           onClick={() => addToCart(item)}
-          disabled={item.qty <= 0 || item.qty > maxStock}
+          disabled={
+            isInShoppingCart ? false : item.qty <= 0 || item.qty > maxStock
+          }
         >
           {isInShoppingCart ? "Agregado" : "Seleccionar"}
         </Button>
