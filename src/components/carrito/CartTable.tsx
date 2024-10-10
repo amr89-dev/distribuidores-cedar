@@ -75,7 +75,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       const formatted = new Intl.NumberFormat("en-CO", {
         style: "currency",
         currency: "COP",
-        maximumSignificantDigits: 2,
+        maximumFractionDigits: 0,
       }).format(amount);
 
       return <div className="">{formatted ?? 0}</div>;
@@ -113,7 +113,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       const formatted = new Intl.NumberFormat("en-CO", {
         style: "currency",
         currency: "COP",
-        maximumSignificantDigits: 2,
+        maximumFractionDigits: 0,
       }).format(totalAmount);
 
       return <div className="">{formatted ?? 0}</div>;

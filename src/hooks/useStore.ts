@@ -4,6 +4,8 @@ import { create } from "zustand";
 interface StoreState {
   products: Product[];
   shoppingCart: CartItem[];
+  totalCartAmount: number;
+  updateTotalCartAmount: () => void;
   filteredProducts: Product[];
   filters: {
     brand: string;
@@ -19,6 +21,7 @@ export const useStore = create<StoreState>((set) => ({
   products: [],
   filteredProducts: [],
   shoppingCart: [],
+  totalCartAmount: 0,
   filters: { brand: "" },
   setProducts: (products) =>
     set(() => {
@@ -72,5 +75,17 @@ export const useStore = create<StoreState>((set) => ({
         : (newCart = state.shoppingCart.filter((item) => item.sku !== sku));
 
       return { shoppingCart: newCart };
+    }),
+  updateTotalCartAmount: () =>
+    set((state) => {
+      const totalAmount = state.shoppingCart.reduce((acc, item) => {
+        const product = state.products.find(
+          (product) => product.sku === item.sku
+        );
+        const price = product?.price ?? 0;
+        return acc + item.qty * price;
+      }, 0);
+      state.totalCartAmount = totalAmount;
+      return { totalCartAmount: totalAmount };
     }),
 }));

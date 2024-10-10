@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { useState } from "react";
 import { Customer } from "@/types";
+import { useStore } from "@/hooks/useStore";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [customer, setCustomer] = useState<Customer>();
+  const { totalCartAmount } = useStore();
 
   const handleSearch = async () => {
     try {
@@ -35,9 +37,10 @@ export default function CheckoutForm() {
   const formatted = new Intl.NumberFormat("en-CO", {
     style: "currency",
     currency: "COP",
-    maximumSignificantDigits: 2,
-  }).format(0);
+    maximumFractionDigits: 0,
+  }).format(totalCartAmount);
 
+  console.log(totalCartAmount);
   return (
     <div className="w-full max-w-md h-auto  top-0">
       <h2 className="text-xl font-bold mb-2">Datos del cliente:</h2>
