@@ -16,13 +16,12 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   sku,
   flag,
 }) => {
-  const { shoppingCart, addToCart, removeFromCart } = useStore();
-
+  const { shoppingCart, addToCart, removeFromCart, updateTotalCartAmount } =
+    useStore();
   const [item, setItem] = useState({ sku: "", qty: 0 });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-
     setItem({
       sku: sku,
       qty: Number(value) > maxStock ? maxStock : Number(value),
@@ -49,6 +48,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
             isInShoppingCart
               ? () => {
                   removeFromCart(isInShoppingCart.sku as string, false);
+                  updateTotalCartAmount();
                 }
               : handleDecrease
           }
@@ -76,6 +76,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
                     sku: isInShoppingCart.sku,
                     qty: 1,
                   });
+                  updateTotalCartAmount();
                 }
               : handleIncrease
           }
@@ -93,9 +94,12 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
         <Button
           className={`w-32 bg-gradient-to-r from-blue-600 to-sky-600 hover:opacity-45 hover:transition-opacity ${clsx(
             isInShoppingCart?.qty &&
-              "bg-gradient-to-r from-green-600 to-emerald-600"
+              "disabled:bg-gradient-to-r disabled:from-green-600 disabled:to-emerald-600 disabled:opacity-1  "
           )}`}
-          onClick={() => addToCart(item)}
+          onClick={() => {
+            addToCart(item);
+            updateTotalCartAmount();
+          }}
           disabled={item.qty <= 0 || item.qty > maxStock}
         >
           {isInShoppingCart ? "Agregado" : "Seleccionar"}

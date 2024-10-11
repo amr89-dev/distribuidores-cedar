@@ -3,18 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { useState } from "react";
-
-type fakeClient = {
-  doc_id?: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  type?: string;
-};
+import { Customer } from "@/types";
+import { useStore } from "@/hooks/useStore";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
-  const [customer, setCustomer] = useState<fakeClient>();
+  const [customer, setCustomer] = useState<Customer>();
+  const { totalCartAmount } = useStore();
 
   const handleSearch = async () => {
     try {
@@ -39,9 +34,16 @@ export default function CheckoutForm() {
     alert(JSON.stringify(customer, null, 2));
   };
 
+  const formatted = new Intl.NumberFormat("en-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  }).format(totalCartAmount);
+
   return (
-    <div className="w-full max-w-md h-auto top-0">
-      <div className="sticky top-0  flex flex-col gap-2  bg-white">
+    <div className="w-full max-w-md h-auto  top-0">
+      <div className=" sticky top-0  flex flex-col gap-2 bg-white ">
+        <h2 className="text-xl font-bold ">Datos del cliente:</h2>
         <div className="flex flex-row justify-between gap-2">
           <Input
             type="text"
@@ -87,14 +89,17 @@ export default function CheckoutForm() {
             onChange={handleCustomerChange}
           />
         </div>
+        <div className="w-full mt-4 flex flex-col gap-2">
+          <p className="text-2xl font-bold text-end">Subtotal: {formatted}</p>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white"
+          onClick={handleSubmit}
+        >
+          Confirmar Pedido
+        </Button>
       </div>
-      <Button
-        variant="outline"
-        className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white"
-        onClick={handleSubmit}
-      >
-        Confirmar
-      </Button>
     </div>
   );
 }

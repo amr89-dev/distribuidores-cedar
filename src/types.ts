@@ -10,3 +10,11 @@ export interface Product {
 export interface CartItem extends Partial<Product> {
   qty: number;
 }
+
+export interface Customer {
+  name?: string;
+  phone?: string;
+  email?: string;
+  dealerId?: string;
+  types?: string;
+}
