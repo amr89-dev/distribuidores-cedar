@@ -8,7 +8,10 @@ export default function Carrito() {
   return (
     <div className=" max-w-screen-2xl mx-auto p-4">
       <div className="flex items-center justify-between ">
-        <Link href="/" className=" flex items-center gap-1 text-sm">
+        <Link
+          href="/"
+          className="flex items-center gap-1 text-sm transform transition-transform duration-100 hover:scale-105"
+        >
           <ArrowLeft className="h-4 w-4" />
           Volver
         </Link>
