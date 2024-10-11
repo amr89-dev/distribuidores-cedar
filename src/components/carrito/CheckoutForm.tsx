@@ -46,7 +46,7 @@ export default function CheckoutForm() {
         qty: item.qty,
       };
     });
-    alert(JSON.stringify({ customer, items }, null, 2));
+
     fetch("api/orders", {
       method: "POST",
       headers: {
