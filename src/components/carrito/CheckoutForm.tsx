@@ -5,14 +5,18 @@ import clsx from "clsx";
 import { useState } from "react";
 import { Customer } from "@/types";
 import { useStore } from "@/hooks/useStore";
+import { LoaderCircle } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [customer, setCustomer] = useState<Customer>();
-  const { totalCartAmount } = useStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const { totalCartAmount, shoppingCart, products } = useStore();
 
   const handleSearch = async () => {
     try {
+      setIsLoading(true);
       const res = await fetch(`/api/customers?docid=${searchValue}`);
       if (!res.ok) {
         throw new Error("Failed to fetch customer");
@@ -21,8 +25,10 @@ export default function CheckoutForm() {
       if (data.length > 0) {
         setCustomer(data[0]);
       }
+      setIsLoading(false);
     } catch (err) {
       console.log(err);
+      setIsLoading(false);
     }
   };
 
@@ -31,14 +37,27 @@ export default function CheckoutForm() {
   };
 
   const handleSubmit = () => {
-    alert(JSON.stringify(customer, null, 2));
+    const items = shoppingCart.map((item) => {
+      const product = products.find((product) => product.sku === item.sku);
+      return {
+        sku: item.sku,
+        description: product?.description,
+        price: product?.price,
+        totalAmount: item.qty * (product?.price ?? 0),
+        qty: item.qty,
+      };
+    });
+
+    fetch("api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ customerInfo: customer, items }),
+    });
   };
 
-  const formatted = new Intl.NumberFormat("en-CO", {
-    style: "currency",
-    currency: "COP",
-    maximumFractionDigits: 0,
-  }).format(totalCartAmount);
+  const formatted = formatPrice(totalCartAmount);
 
   return (
     <div className="w-full max-w-md h-auto  top-0">
@@ -61,7 +80,11 @@ export default function CheckoutForm() {
             )}
             onClick={handleSearch}
           >
-            Buscar
+            {isLoading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              "Buscar"
+            )}
           </Button>
         </div>
         <div className="flex flex-col gap-2">
