@@ -40,6 +40,7 @@ import { useStore } from "@/hooks/useStore";
 import SkeletonRow from "./SekeletonRow";
 import clsx from "clsx";
 import QuantitySelector from "./QuantitySelector";
+import { formatPrice } from "@/lib/utils";
 
 const getStockStatus = (stock: number): { text: string; color: string } => {
   if (stock <= 0) return { text: "No disponible", color: "bg-red-500" };
@@ -156,11 +157,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("price"));
-      const formatted = new Intl.NumberFormat("en-CO", {
-        style: "currency",
-        currency: "COP",
-        maximumFractionDigits: 0,
-      }).format(amount);
+      const formatted = formatPrice(amount);
 
       return <div className="">{formatted}</div>;
     },

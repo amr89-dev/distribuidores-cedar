@@ -24,6 +24,7 @@ import { CartItem } from "@/types";
 import { ArrowUpDown } from "lucide-react";
 import QuantitySelector from "../home/MainTable/QuantitySelector";
 import { useStore } from "@/hooks/useStore";
+import { formatPrice } from "@/lib/utils";
 
 export const createColumns = (): ColumnDef<CartItem>[] => [
   {
@@ -72,11 +73,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("price"));
-      const formatted = new Intl.NumberFormat("en-CO", {
-        style: "currency",
-        currency: "COP",
-        maximumFractionDigits: 0,
-      }).format(amount);
+      const formatted = formatPrice(amount);
 
       return <div className="">{formatted ?? 0}</div>;
     },
@@ -110,11 +107,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       const amount = parseFloat(row.getValue("price")) ?? 0;
       const qty = row.original.qty ?? 0;
       const totalAmount = amount * qty;
-      const formatted = new Intl.NumberFormat("en-CO", {
-        style: "currency",
-        currency: "COP",
-        maximumFractionDigits: 0,
-      }).format(totalAmount);
+      const formatted = formatPrice(totalAmount);
 
       return <div className="">{formatted ?? 0}</div>;
     },

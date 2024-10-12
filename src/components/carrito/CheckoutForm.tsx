@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Customer } from "@/types";
 import { useStore } from "@/hooks/useStore";
 import { LoaderCircle } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -56,11 +57,7 @@ export default function CheckoutForm() {
     });
   };
 
-  const formatted = new Intl.NumberFormat("en-CO", {
-    style: "currency",
-    currency: "COP",
-    maximumFractionDigits: 0,
-  }).format(totalCartAmount);
+  const formatted = formatPrice(totalCartAmount);
 
   return (
     <div className="w-full max-w-md h-auto  top-0">
