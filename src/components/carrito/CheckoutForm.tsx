@@ -7,12 +7,14 @@ import { Customer } from "@/types";
 import { useStore } from "@/hooks/useStore";
 import { LoaderCircle } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [customer, setCustomer] = useState<Customer>();
   const [isLoading, setIsLoading] = useState(false);
   const { totalCartAmount, shoppingCart, products } = useStore();
+  const { toast } = useToast();
 
   const handleSearch = async () => {
     try {
@@ -27,6 +29,12 @@ export default function CheckoutForm() {
       }
       setIsLoading(false);
     } catch (err) {
+      toast({
+        title: "Usuario no encontrado",
+        description:
+          "No pudimos encontrar un usuario con la información proporcionada. Por favor, verifica los datos e intenta nuevamente.",
+        variant: "destructive",
+      });
       console.log(err);
       setIsLoading(false);
     }
@@ -76,7 +84,7 @@ export default function CheckoutForm() {
             className={clsx(
               "transition-colors duration-300 ease-in-out",
               searchValue.length > 0 &&
-                "bg-gradient-to-r from-blue-800 to-sky-600 text-white"
+                "bg-gradient-to-r from-blue-800 to-sky-600 text-white hover:opacity-90 hover:text-white "
             )}
             onClick={handleSearch}
           >
@@ -117,7 +125,7 @@ export default function CheckoutForm() {
         </div>
         <Button
           variant="outline"
-          className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white"
+          className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white hover:opacity-90 hover:text-white"
           onClick={handleSubmit}
         >
           Confirmar Pedido
