@@ -8,6 +8,7 @@ import { useStore } from "@/hooks/useStore";
 import { LoaderCircle } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { createOrder } from "@/lib/actions";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -59,24 +60,13 @@ export default function CheckoutForm() {
 
     try {
       setIsLoading(true);
-      const res = await fetch("api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ items, customer, totalCartAmount }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to create order");
-      }
-      //eslint-disable-next-line
-      const { orderCreated } = await res.json();
-
+      if (!items.length || !customer) return;
+      await createOrder(items, customer, totalCartAmount);
       setIsLoading(false);
       toast({
         title: "Orden creada exitosamente",
-        description: "La orden ha sido creada exitosamente",
+        description:
+          "La orden ha sido creada exitosamente, a su correo se enviará la confirmación de pedido",
         variant: "success",
       });
     } catch (err) {
