@@ -1,5 +1,3 @@
-// src/app/api/customers/[docid]/route.ts
-
 import { getCustomerById } from "@/services/customer.service";
 import { NextResponse as res } from "next/server";
 
