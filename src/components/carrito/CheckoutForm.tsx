@@ -8,6 +8,7 @@ import { useStore } from "@/hooks/useStore";
 import { LoaderCircle } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { createOrder } from "@/lib/actions";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -19,11 +20,11 @@ export default function CheckoutForm() {
   const handleSearch = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/customers?docid=${searchValue}`);
+      const res = await fetch(`/api/customers/${searchValue}`);
       if (!res.ok) {
         throw new Error("Failed to fetch customer");
       }
-      const data = await res.json();
+      const { rows: data } = await res.json();
       if (data.length > 0) {
         setCustomer(data[0]);
       }
@@ -44,25 +45,40 @@ export default function CheckoutForm() {
     setCustomer({ ...customer, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const items = shoppingCart.map((item) => {
       const product = products.find((product) => product.sku === item.sku);
       return {
         sku: item.sku,
         description: product?.description,
+        brand: product?.brand,
         price: product?.price,
         totalAmount: item.qty * (product?.price ?? 0),
         qty: item.qty,
       };
     });
 
-    fetch("api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ customerInfo: customer, items }),
-    });
+    try {
+      setIsLoading(true);
+      if (!items.length || !customer) return;
+      await createOrder(items, customer, totalCartAmount);
+      setIsLoading(false);
+      toast({
+        title: "Orden creada exitosamente",
+        description:
+          "La orden ha sido creada exitosamente, a su correo se enviará la confirmación de pedido",
+        variant: "success",
+      });
+    } catch (err) {
+      toast({
+        title: "Error creando orden",
+        description:
+          "No se pudo crear la orden. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
+      console.log(err);
+      setIsLoading(false);
+    }
   };
 
   const formatted = formatPrice(totalCartAmount);

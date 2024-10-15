@@ -1,14 +1,11 @@
-import { getCustomerById } from "@/services/customer.service";
+import { getAllCustomers } from "@/services/customer.service";
 import { NextResponse as res } from "next/server";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("docid") ?? "";
+export async function GET() {
   try {
-    const { rows: customer } = await getCustomerById(id);
-
-    return res.json(customer, { status: 200 });
+    const customers = await getAllCustomers();
+    return res.json(customers, { status: 200 });
   } catch (error) {
-    return res.json({ error: "not found" }, { status: 404 });
+    return res.json({ error: "Unable to fetch customers" }, { status: 500 });
   }
 }
