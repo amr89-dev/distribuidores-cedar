@@ -19,7 +19,7 @@ export default function CheckoutForm() {
   const handleSearch = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/customers?docid=${searchValue}`);
+      const res = await fetch(`/api/costomer/${searchValue}`);
       if (!res.ok) {
         throw new Error("Failed to fetch customer");
       }
@@ -50,6 +50,7 @@ export default function CheckoutForm() {
       return {
         sku: item.sku,
         description: product?.description,
+        brand: product?.brand,
         price: product?.price,
         totalAmount: item.qty * (product?.price ?? 0),
         qty: item.qty,
@@ -61,7 +62,8 @@ export default function CheckoutForm() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ customerInfo: customer, items }),
+
+      body: JSON.stringify({ customerInfo: customer, items, totalCartAmount }),
     });
   };
 
