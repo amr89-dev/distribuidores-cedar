@@ -9,17 +9,23 @@ import { LoaderCircle } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { createOrder } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [customer, setCustomer] = useState<Customer>();
-  const [isLoading, setIsLoading] = useState(false);
-  const { totalCartAmount, shoppingCart, products } = useStore();
+  const [isLoading, setIsLoading] = useState({
+    searchLoading: false,
+    orderLoading: false,
+  });
+  const { totalCartAmount, shoppingCart, products, removeFromCart } =
+    useStore();
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSearch = async () => {
     try {
-      setIsLoading(true);
+      setIsLoading((prev) => ({ ...prev, searchLoading: true }));
       const res = await fetch(`/api/customers/${searchValue}`);
       if (!res.ok) {
         throw new Error("Failed to fetch customer");
@@ -28,7 +34,7 @@ export default function CheckoutForm() {
       if (data.length > 0) {
         setCustomer(data[0]);
       }
-      setIsLoading(false);
+      setIsLoading((prev) => ({ ...prev, searchLoading: false }));
     } catch (err) {
       toast({
         title: "Usuario no encontrado",
@@ -37,7 +43,7 @@ export default function CheckoutForm() {
         variant: "destructive",
       });
       console.log(err);
-      setIsLoading(false);
+      setIsLoading((prev) => ({ ...prev, searchLoading: false }));
     }
   };
 
@@ -59,25 +65,27 @@ export default function CheckoutForm() {
     });
 
     try {
-      setIsLoading(true);
-      if (!items.length || !customer) return;
+      setIsLoading((prev) => ({ ...prev, orderLoading: true }));
+      if (!items.length || !customer) throw new Error("Faltan datos");
       await createOrder(items, customer, totalCartAmount);
-      setIsLoading(false);
+      setIsLoading((prev) => ({ ...prev, orderLoading: false }));
       toast({
         title: "Orden creada exitosamente",
         description:
           "La orden ha sido creada exitosamente, a su correo se enviará la confirmación de pedido",
         variant: "success",
       });
-    } catch (err) {
+      removeFromCart(null, true);
+      setCustomer({});
+      router.push("/");
+    } catch (err: unknown) {
       toast({
-        title: "Error creando orden",
-        description:
-          "No se pudo crear la orden. Por favor, inténtalo de nuevo.",
+        title: `${err}`,
+        description: ` No se pudo crear la orden. Por favor, inténtalo de nuevo`,
         variant: "destructive",
       });
       console.log(err);
-      setIsLoading(false);
+      setIsLoading((prev) => ({ ...prev, orderLoading: false }));
     }
   };
 
@@ -104,7 +112,7 @@ export default function CheckoutForm() {
             )}
             onClick={handleSearch}
           >
-            {isLoading ? (
+            {isLoading.searchLoading ? (
               <LoaderCircle className="h-4 w-4 animate-spin" />
             ) : (
               "Buscar"
@@ -144,7 +152,11 @@ export default function CheckoutForm() {
           className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white hover:opacity-90 hover:text-white"
           onClick={handleSubmit}
         >
-          Confirmar Pedido
+          {isLoading.orderLoading ? (
+            <LoaderCircle className="h-4 w-4 animate-spin" />
+          ) : (
+            "Confirmar Pedido"
+          )}
         </Button>
       </div>
     </div>

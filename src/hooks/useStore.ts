@@ -14,7 +14,7 @@ interface StoreState {
   setBrand: (brand: string) => void;
   applyFilters: () => void;
   addToCart: (product: CartItem) => void;
-  removeFromCart: (sku: string, all: boolean) => void;
+  removeFromCart: (sku: string | null, all: boolean) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -59,13 +59,12 @@ export const useStore = create<StoreState>((set) => ({
 
       return { shoppingCart: newCart };
     }),
-  removeFromCart: (sku, all) =>
+  removeFromCart: (sku, all = false) =>
     set((state) => {
       let newCart: CartItem[] = [];
       if (all) {
-        newCart = state.shoppingCart.filter((item) => item.sku !== sku);
+        return { shoppingCart: newCart };
       }
-
       const itemToDelete = state.shoppingCart.find((item) => item.sku === sku);
 
       itemToDelete && itemToDelete?.qty > 1
