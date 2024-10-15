@@ -1,4 +1,3 @@
-import { getItemBySku } from "@/services/items.service";
 import { NextResponse as res } from "next/server";
 
 export async function GET(
@@ -7,7 +6,7 @@ export async function GET(
 ) {
   const { sku } = params;
   try {
-    const item = await getItemBySku(sku);
+    const item = sku;
 
     if (!item) {
       return res.json({ error: "Item not found" }, { status: 404 });

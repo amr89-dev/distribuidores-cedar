@@ -19,11 +19,11 @@ export default function CheckoutForm() {
   const handleSearch = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/costomer/${searchValue}`);
+      const res = await fetch(`/api/customers/${searchValue}`);
       if (!res.ok) {
         throw new Error("Failed to fetch customer");
       }
-      const data = await res.json();
+      const { rows: data } = await res.json();
       if (data.length > 0) {
         setCustomer(data[0]);
       }
@@ -44,7 +44,7 @@ export default function CheckoutForm() {
     setCustomer({ ...customer, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const items = shoppingCart.map((item) => {
       const product = products.find((product) => product.sku === item.sku);
       return {
@@ -57,14 +57,38 @@ export default function CheckoutForm() {
       };
     });
 
-    fetch("api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    try {
+      setIsLoading(true);
+      const res = await fetch("api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ items, customer, totalCartAmount }),
+      });
 
-      body: JSON.stringify({ customerInfo: customer, items, totalCartAmount }),
-    });
+      if (!res.ok) {
+        throw new Error("Failed to create order");
+      }
+      //eslint-disable-next-line
+      const { orderCreated } = await res.json();
+
+      setIsLoading(false);
+      toast({
+        title: "Orden creada exitosamente",
+        description: "La orden ha sido creada exitosamente",
+        variant: "success",
+      });
+    } catch (err) {
+      toast({
+        title: "Error creando orden",
+        description:
+          "No se pudo crear la orden. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
+      console.log(err);
+      setIsLoading(false);
+    }
   };
 
   const formatted = formatPrice(totalCartAmount);

@@ -25,7 +25,7 @@ model items {
   price       Decimal       @db.Decimal(10, 2)
   images      String[]      
   created_at  DateTime?     @default(now()) @db.Timestamp(6)
-  order_items order_items[]
+
 }
 
 model order_items {
@@ -37,8 +37,8 @@ model order_items {
   total_amount Decimal?  @db.Decimal(10, 2)
   created_at   DateTime? @default(now()) @db.Timestamp(6)
   updated_at   DateTime? @default(now()) @db.Timestamp(6)
-  orders       orders    @relation(fields: [order_id], references: [order_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_order")
-  items        items     @relation(fields: [sku], references: [sku], onDelete: Cascade, onUpdate: NoAction, map: "fk_sku")
+
+  orders       orders    @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
 }
 
 model orders {
@@ -46,6 +46,8 @@ model orders {
   customer_id  String        @db.Uuid
   order_date   DateTime      @default(now()) @db.Timestamp(6)
   total_amount Decimal?      @db.Decimal
-  order_items  order_items[]
-  customers    customers     @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+
+  order_items  order_items[] // Relación 1:n con order_items
+  customers    customers     @relation(fields: [customer_id], references: [id], onDelete: Cascade)
 }
