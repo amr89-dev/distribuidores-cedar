@@ -9,7 +9,6 @@ export async function POST(req: Request) {
       customer,
       totalCartAmount,
     };
-
     const orderCreated = await createOrder(order);
 
     return Response.json({ orderCreated }, { status: 200 });

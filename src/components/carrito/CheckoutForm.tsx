@@ -8,7 +8,7 @@ import { useStore } from "@/hooks/useStore";
 import { LoaderCircle } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { createOrder } from "@/lib/actions";
+import { createOrder, sendConfirmationEmail } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 
 export default function CheckoutForm() {
@@ -26,6 +26,7 @@ export default function CheckoutForm() {
   const handleSearch = async () => {
     try {
       setIsLoading((prev) => ({ ...prev, searchLoading: true }));
+      setCustomer((prev) => ({ ...prev, name: "", phone: "", email: "" }));
       const res = await fetch(`/api/customers/${searchValue}`);
       if (!res.ok) {
         throw new Error("Failed to fetch customer");
@@ -38,9 +39,8 @@ export default function CheckoutForm() {
     } catch (err) {
       toast({
         title: "Usuario no encontrado",
-        description:
-          "No pudimos encontrar un usuario con la información proporcionada. Por favor, verifica los datos e intenta nuevamente.",
-        variant: "destructive",
+        description: `Por favor, verifica los datos e intenta nuevamente. O introduce los datos manualmente.`,
+        variant: "warning",
       });
       console.log(err);
       setIsLoading((prev) => ({ ...prev, searchLoading: false }));
@@ -67,7 +67,9 @@ export default function CheckoutForm() {
     try {
       setIsLoading((prev) => ({ ...prev, orderLoading: true }));
       if (!items.length || !customer) throw new Error("Faltan datos");
+
       await createOrder(items, customer, totalCartAmount);
+
       setIsLoading((prev) => ({ ...prev, orderLoading: false }));
       toast({
         title: "Orden creada exitosamente",
@@ -75,6 +77,8 @@ export default function CheckoutForm() {
           "La orden ha sido creada exitosamente, a su correo se enviará la confirmación de pedido",
         variant: "success",
       });
+      await sendConfirmationEmail(items, customer);
+
       removeFromCart(null, true);
       setCustomer({});
       router.push("/");
@@ -102,15 +106,19 @@ export default function CheckoutForm() {
             placeholder="Introduce el nit de la empresa"
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
+            className={clsx(
+              searchValue.length <= 0 && "border border-blue-600"
+            )}
           />
           <Button
             variant="outline"
-            className={clsx(
-              "transition-colors duration-300 ease-in-out",
-              searchValue.length > 0 &&
-                "bg-gradient-to-r from-blue-800 to-sky-600 text-white hover:opacity-90 hover:text-white "
-            )}
-            onClick={handleSearch}
+            className={
+              "bg-gradient-to-r from-blue-800 to-sky-600 text-white hover:opacity-90 hover:text-white "
+            }
+            onClick={() => {
+              handleSearch();
+            }}
+            disabled={searchValue.length <= 0}
           >
             {isLoading.searchLoading ? (
               <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -149,8 +157,16 @@ export default function CheckoutForm() {
         </div>
         <Button
           variant="outline"
-          className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white hover:opacity-90 hover:text-white"
-          onClick={handleSubmit}
+          className="w-full mt-2 bg-gradient-to-r from-blue-800 to-sky-600 text-white hover:opacity-90 hover:text-white "
+          disabled={
+            isLoading.orderLoading ||
+            isLoading.searchLoading ||
+            !searchValue.length ||
+            shoppingCart.length <= 0
+          }
+          onClick={() => {
+            handleSubmit();
+          }}
         >
           {isLoading.orderLoading ? (
             <LoaderCircle className="h-4 w-4 animate-spin" />
