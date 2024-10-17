@@ -27,13 +27,15 @@ export default function CheckoutForm() {
     try {
       setIsLoading((prev) => ({ ...prev, searchLoading: true }));
       setCustomer((prev) => ({ ...prev, name: "", phone: "", email: "" }));
-      const res = await fetch(`/api/customers/${searchValue}`);
+      const res = await fetch(`/api/customers/${searchValue}`, {
+        cache: "no-store",
+      });
       if (!res.ok) {
         throw new Error("Failed to fetch customer");
       }
-      const { rows: data } = await res.json();
-      if (data.length > 0) {
-        setCustomer(data[0]);
+      const data = await res.json();
+      if (data.id.length > 0) {
+        setCustomer(data);
       }
       setIsLoading((prev) => ({ ...prev, searchLoading: false }));
     } catch (err) {
