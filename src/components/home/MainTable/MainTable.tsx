@@ -38,7 +38,6 @@ import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
 import { Slider } from "./Slider";
 import { useStore } from "@/hooks/useStore";
 import SkeletonRow from "./SekeletonRow";
-import clsx from "clsx";
 import QuantitySelector from "./QuantitySelector";
 import { formatPrice } from "@/lib/utils";
 
@@ -299,13 +298,9 @@ export function MainTable() {
             onKeyDown={handleKeyDown}
           />
           <Button
-            variant="outline"
-            className={clsx(
-              "transition-colors duration-300 ease-in-out",
-              searchValue.length > 0 &&
-                "bg-gradient-to-r from-blue-800 to-sky-600 text-white"
-            )}
+            className={"bg-gradient-to-r from-blue-800 to-sky-600 text-white"}
             onClick={handleSearch}
+            disabled={searchValue.length <= 0}
           >
             Buscar
           </Button>
@@ -313,7 +308,7 @@ export function MainTable() {
 
         <div className="w-full">
           {filterValue.length > 0 && (
-            <Badge className="text-white p-2">
+            <Badge className="text-white p-2 ml-2 animate-pulse">
               {filterValue}{" "}
               <button
                 className="ml-2"

@@ -10,6 +10,7 @@ export async function createOrder(order: Order) {
   }: { items: CartItem[]; totalCartAmount: number; customer: Customer } = order;
 
   try {
+    console.log("--------->", customer.id, "<-----------");
     if (!customer.id) {
       throw new Error("Customer ID is required");
     }
@@ -22,14 +23,14 @@ export async function createOrder(order: Order) {
       },
     });
 
-    const orderItems = items.map(async (item) => {
+    items.map(async (item) => {
       const total_amount = item.qty * (item.price ?? 0) || 0;
 
       const newItem = await insertItem(item, order.order_id, total_amount);
       return newItem;
     });
 
-    return { order, orderItems };
+    return { order };
   } catch (err) {
     console.log(err);
     throw new Error("Error creating order");

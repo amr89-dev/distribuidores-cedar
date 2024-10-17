@@ -3,7 +3,7 @@ import * as React from "react";
 
 interface EmailTemplateProps {
   items: CartItem[];
-  dealerInfo: {
+  customer: {
     name: string;
     phone: string;
     email: string;
@@ -12,20 +12,20 @@ interface EmailTemplateProps {
 
 export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
   items,
-  dealerInfo,
+  customer,
 }) => (
   <html>
     <body style={styles.body}>
       <div style={styles.container}>
-        <h1 style={styles.header}>Hola, {dealerInfo.name}!</h1>
+        <h1 style={styles.header}>Hola, {customer.name}!</h1>
         <p style={styles.text}>
           Te hemos enviado un pedido con los siguientes detalles:
         </p>
         <p style={styles.text}>Datos del cliente:</p>
         <ul style={styles.ul}>
-          <li>Nombre: {dealerInfo.name}</li>
-          <li>Teléfono: {dealerInfo.phone}</li>
-          <li>Email: {dealerInfo.email}</li>
+          <li>Nombre: {customer.name}</li>
+          <li>Teléfono: {customer.phone}</li>
+          <li>Email: {customer.email}</li>
         </ul>
         <table
           style={{
