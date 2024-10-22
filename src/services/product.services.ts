@@ -2,7 +2,7 @@ import { Product } from "@/types";
 import { unstable_noStore as noStore } from "next/cache";
 
 const DB_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWR72eZJF2rVYYEqtqmaWkjERK4w6GW2hziQPzz1hk_3x-8vVveKxiErmUmNqM2Y82RmxT8ujGp6k-/pub?gid=2052466567&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWR72eZJF2rVYYEqtqmaWkjERK4w6GW2hziQPzz1hk_3x-8vVveKxiErmUmNqM2Y82RmxT8ujGp6k-/pub?gid=1974958561&single=true&output=csv";
 
 export async function getAllProducts(): Promise<Product[]> {
   noStore();
