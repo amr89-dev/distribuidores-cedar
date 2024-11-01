@@ -2,23 +2,31 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Customer } from "@/types";
 import { useStore } from "@/hooks/useStore";
 import { LoaderCircle } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { createOrder, sendConfirmationEmail } from "@/lib/actions";
+import { sendConfirmationEmail } from "@/lib/actions";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export default function CheckoutForm() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [customer, setCustomer] = useState<Customer>();
+  const [sellerSelected, setSellerSelected] = useState<string>("");
   const [isLoading, setIsLoading] = useState({
     searchLoading: false,
     orderLoading: false,
   });
-  const { totalCartAmount, shoppingCart, products, removeFromCart } =
+  const { totalCartAmount, shoppingCart, products, removeFromCart, sellers } =
     useStore();
   const { toast } = useToast();
   const router = useRouter();
@@ -49,6 +57,10 @@ export default function CheckoutForm() {
     }
   };
 
+  const handleSellerChange = (id: string) => {
+    setSellerSelected(id);
+  };
+
   const handleCustomerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCustomer({ ...customer, [event.target.name]: event.target.value });
   };
@@ -70,7 +82,18 @@ export default function CheckoutForm() {
       setIsLoading((prev) => ({ ...prev, orderLoading: true }));
       if (!items.length || !customer) throw new Error("Faltan datos");
 
-      await createOrder(items, customer, totalCartAmount);
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items,
+          customer,
+          sellerId: sellerSelected,
+          totalCartAmount,
+        }),
+      });
 
       setIsLoading((prev) => ({ ...prev, orderLoading: false }));
       toast({
@@ -79,7 +102,12 @@ export default function CheckoutForm() {
           "La orden ha sido creada exitosamente, a su correo se enviará la confirmación de pedido",
         variant: "success",
       });
-      await sendConfirmationEmail(items, customer);
+
+      const sellerMail = sellers.find(
+        (seller) => seller.id === sellerSelected
+      )?.email;
+      if (!sellerMail) throw new Error("No se encontró el mail del vendedor");
+      await sendConfirmationEmail(items, customer, sellerMail);
 
       removeFromCart(null, true);
       setCustomer({});
@@ -96,7 +124,6 @@ export default function CheckoutForm() {
   };
 
   const formatted = formatPrice(totalCartAmount);
-
   return (
     <div className="w-full max-w-md h-auto  top-0">
       <div className=" sticky top-0  flex flex-col gap-2 bg-white ">
@@ -153,6 +180,22 @@ export default function CheckoutForm() {
             value={customer?.email}
             onChange={handleCustomerChange}
           />
+          <Select value={sellerSelected} onValueChange={handleSellerChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona un vendedor" />
+            </SelectTrigger>
+            <SelectContent>
+              {sellers.map((seller) => {
+                return (
+                  <>
+                    <SelectItem key={seller.id} value={seller.id ?? ""}>
+                      {seller.name}
+                    </SelectItem>
+                  </>
+                );
+              })}
+            </SelectContent>
+          </Select>
         </div>
         <div className="w-full mt-4 flex flex-col gap-2">
           <p className="text-2xl font-bold text-end">Subtotal: {formatted}</p>

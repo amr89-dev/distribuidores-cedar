@@ -1,16 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { CartItem, Customer, Order } from "@/types";
+import { Order } from "@/types";
 import { insertItem } from "./orderItems.service";
 
 export async function createOrder(order: Order) {
-  const {
-    items,
-    totalCartAmount,
-    customer,
-  }: { items: CartItem[]; totalCartAmount: number; customer: Customer } = order;
+  const { items, totalCartAmount, sellerId, customer } = order;
 
   try {
-    console.log("--------->", customer.id, "<-----------");
     if (!customer.id) {
       throw new Error("Customer ID is required");
     }
@@ -20,6 +15,7 @@ export async function createOrder(order: Order) {
         customer_id: customer.id,
         order_date: new Date(),
         total_amount: totalCartAmount,
+        seller_id: sellerId,
       },
     });
 

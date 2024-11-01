@@ -184,6 +184,7 @@ export function MainTable() {
     filters,
     setBrand,
     filteredProducts,
+    setSellers,
   } = useStore();
   const [isLoading, setIsLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -272,6 +273,12 @@ export function MainTable() {
         }
         const data = await res.json();
         setProducts(data);
+        const sellers = await fetch("/api/sellers");
+        if (!sellers.ok) {
+          throw new Error("Failed to fetch sellers");
+        }
+        const sellerData = await sellers.json();
+        setSellers(sellerData);
         setIsLoading(false);
       } catch (error) {
         setIsLoading(false);
@@ -280,7 +287,7 @@ export function MainTable() {
     };
 
     fetchProducts();
-  }, [setProducts]);
+  }, [setProducts, setSellers]);
 
   React.useEffect(() => {
     applyFilters();

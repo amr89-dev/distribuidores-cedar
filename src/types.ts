@@ -22,7 +22,15 @@ export interface Customer {
 
 export interface Order {
   order_id?: string;
+  sellerId?: string;
   items: CartItem[];
   customer: Customer;
   totalCartAmount: number;
+}
+
+export interface Seller {
+  id?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
 }

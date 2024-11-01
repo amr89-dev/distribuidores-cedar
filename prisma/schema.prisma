@@ -28,6 +28,16 @@ model items {
 
 }
 
+model sellers {
+  id     String  @id @default(uuid()) @db.Uuid
+  name   String? @db.VarChar(255)
+  phone  String? @db.VarChar(15)
+  email  String? @unique @db.VarChar(255)
+
+  orders orders[] // Relación 1:n con orders
+
+} 
+
 model order_items {
   id           String    @id @default(uuid()) @db.Uuid
   order_id     String    @db.Uuid
@@ -42,12 +52,15 @@ model order_items {
 }
 
 model orders {
-  order_id     String        @id @default(uuid()) @db.Uuid
-  customer_id  String        @db.Uuid
-  order_date   DateTime      @default(now()) @db.Timestamp(6)
-  total_amount Decimal?      @db.Decimal
+  order_id     String      @id @default(uuid()) @db.Uuid
+  customer_id  String      @db.Uuid
+  seller_id    String?     @db.Uuid 
+  order_date   DateTime    @default(now()) @db.Timestamp(6)
+  total_amount Decimal?    @db.Decimal
 
-
-  order_items  order_items[] // Relación 1:n con order_items
+  order_items  order_items[] 
   customers    customers     @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  sellers      sellers?      @relation(fields: [seller_id], references: [id], onDelete: Cascade) // Update relation
 }
+
+

@@ -2,12 +2,13 @@ import { createOrder, getAllOrders } from "@/services/order.service";
 import { Order } from "@/types";
 
 export async function POST(req: Request) {
-  const { items, customer, totalCartAmount } = await req.json();
+  const { items, customer, sellerId, totalCartAmount } = await req.json();
   try {
     const order: Order = {
       items,
       customer,
       totalCartAmount,
+      sellerId,
     };
     const orderCreated = await createOrder(order);
 

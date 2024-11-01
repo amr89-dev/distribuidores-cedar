@@ -1,8 +1,10 @@
-import { CartItem, Product } from "@/types";
+import { CartItem, Product, Seller } from "@/types";
 import { create } from "zustand";
 
 interface StoreState {
   products: Product[];
+  sellers: Seller[];
+  setSellers: (sellers: Seller[]) => void;
   shoppingCart: CartItem[];
   totalCartAmount: number;
   updateTotalCartAmount: () => void;
@@ -21,6 +23,12 @@ export const useStore = create<StoreState>((set) => ({
   products: [],
   filteredProducts: [],
   shoppingCart: [],
+  sellers: [],
+  setSellers: (sellers: Seller[]) =>
+    set(() => {
+      set({ sellers });
+      return { sellers };
+    }),
   totalCartAmount: 0,
   filters: { brand: "" },
   setProducts: (products) =>
