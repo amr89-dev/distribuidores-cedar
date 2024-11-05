@@ -19,7 +19,7 @@ export async function insertItem(
     const newOrderItem = await prisma.order_items.create({
       data: {
         order_id,
-        sku: item.sku!,
+        sku: item.referencia!,
         price: Number(item.price),
         qty: item.qty,
         total_amount: total_amount,

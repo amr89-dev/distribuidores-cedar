@@ -43,9 +43,9 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.sku}>
-                <td style={styles.td}>{item.sku}</td>
-                <td style={styles.td}>{item.description}</td>
+              <tr key={item.referencia}>
+                <td style={styles.td}>{item.referencia}</td>
+                <td style={styles.td}>{item.descripcion}</td>
                 <td style={styles.td}>{item.qty}</td>
                 <td style={styles.td}>${item.price}</td>
               </tr>

@@ -72,7 +72,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       </Button>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("price"));
+      const amount = parseFloat(row.getValue("price") ?? "");
       const formatted = formatPrice(amount);
 
       return <div className="">{formatted ?? 0}</div>;
@@ -87,7 +87,7 @@ export const createColumns = (): ColumnDef<CartItem>[] => [
       const referencia: string = row.getValue("sku");
       return (
         <div className="flex items-center space-x-2">
-          <QuantitySelector maxStock={stock} sku={referencia} />
+          <QuantitySelector maxStock={stock} referencia={referencia} />
         </div>
       );
     },
@@ -123,10 +123,12 @@ export default function CartTable() {
 
   const data: CartItem[] = React.useMemo(() => {
     return shoppingCart.map((item) => {
-      const product = products.find((product) => product.sku === item.sku);
+      const product = products.find(
+        (product) => product.referencia === item.referencia
+      );
       return {
-        sku: item.sku,
-        description: product?.description,
+        sku: item.referencia,
+        description: product?.descripcion,
         price: product?.price,
         stock: product?.stock,
         qty: item.qty,

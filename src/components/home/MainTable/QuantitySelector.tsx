@@ -7,36 +7,38 @@ import clsx from "clsx";
 
 interface QuantitySelectorProps {
   maxStock: number;
-  sku: string;
+  referencia: string;
   flag?: boolean;
 }
 
 const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   maxStock,
-  sku,
+  referencia,
   flag,
 }) => {
   const { shoppingCart, addToCart, removeFromCart, updateTotalCartAmount } =
     useStore();
-  const [item, setItem] = useState({ sku: "", qty: 0 });
+  const [item, setItem] = useState({ referencia: "", qty: 0 });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setItem({
-      sku: sku,
+      referencia: referencia,
       qty: Number(value) > maxStock ? maxStock : Number(value),
     });
   };
 
   const handleDecrease = () => {
-    setItem({ sku: sku, qty: item.qty - 1 });
+    setItem({ referencia: referencia, qty: item.qty - 1 });
   };
 
   const handleIncrease = () => {
-    setItem({ sku: sku, qty: item.qty + 1 });
+    setItem({ referencia: referencia, qty: item.qty + 1 });
   };
 
-  const isInShoppingCart = shoppingCart.find((item) => item.sku === sku);
+  const isInShoppingCart = shoppingCart.find(
+    (item) => item.referencia === referencia
+  );
 
   return (
     <div className="flex items-center space-x-2">
@@ -47,7 +49,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
           onClick={
             isInShoppingCart
               ? () => {
-                  removeFromCart(isInShoppingCart.sku as string, false);
+                  removeFromCart(isInShoppingCart.referencia as string, false);
                   updateTotalCartAmount();
                 }
               : handleDecrease
@@ -73,7 +75,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
             isInShoppingCart
               ? () => {
                   addToCart({
-                    sku: isInShoppingCart.sku,
+                    referencia: isInShoppingCart.referencia,
                     qty: 1,
                   });
                   updateTotalCartAmount();

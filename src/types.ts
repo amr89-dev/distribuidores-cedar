@@ -1,7 +1,7 @@
 export interface Product {
-  sku: string;
-  brand: string;
-  description: string;
+  referencia: string;
+  marca: string;
+  descripcion: string;
   price: number;
   stock: number;
   images?: string[];

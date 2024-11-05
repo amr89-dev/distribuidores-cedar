@@ -16,7 +16,7 @@ interface StoreState {
   setBrand: (brand: string) => void;
   applyFilters: () => void;
   addToCart: (product: CartItem) => void;
-  removeFromCart: (sku: string | null, all: boolean) => void;
+  removeFromCart: (referencia: string | null, all: boolean) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -43,7 +43,7 @@ export const useStore = create<StoreState>((set) => ({
       const { brand } = state.filters;
       const filteredProducts = state.products.filter((product) => {
         const matchesBrand = brand
-          ? product.brand.toLowerCase() === brand.toLowerCase()
+          ? product.marca.toLowerCase() === brand.toLowerCase()
           : true;
 
         return matchesBrand;
@@ -54,12 +54,12 @@ export const useStore = create<StoreState>((set) => ({
   addToCart: (product: CartItem) =>
     set((state) => {
       const itemExists = state.shoppingCart.find(
-        (item) => item.sku === product.sku
+        (item) => item.referencia === product.referencia
       );
       let newCart = [];
       itemExists
         ? (newCart = state.shoppingCart.map((item) =>
-            item.sku === product.sku
+            item.referencia === product.referencia
               ? { ...item, qty: item.qty + product.qty }
               : item
           ))
@@ -67,19 +67,25 @@ export const useStore = create<StoreState>((set) => ({
 
       return { shoppingCart: newCart };
     }),
-  removeFromCart: (sku, all = false) =>
+  removeFromCart: (referencia, all = false) =>
     set((state) => {
       let newCart: CartItem[] = [];
       if (all) {
         return { shoppingCart: newCart };
       }
-      const itemToDelete = state.shoppingCart.find((item) => item.sku === sku);
+      const itemToDelete = state.shoppingCart.find(
+        (item) => item.referencia === referencia
+      );
 
       itemToDelete && itemToDelete?.qty > 1
         ? (newCart = state.shoppingCart.map((item) =>
-            item.sku === sku ? { ...item, qty: item.qty - 1 } : item
+            item.referencia === referencia
+              ? { ...item, qty: item.qty - 1 }
+              : item
           ))
-        : (newCart = state.shoppingCart.filter((item) => item.sku !== sku));
+        : (newCart = state.shoppingCart.filter(
+            (item) => item.referencia !== referencia
+          ));
 
       return { shoppingCart: newCart };
     }),
@@ -87,7 +93,7 @@ export const useStore = create<StoreState>((set) => ({
     set((state) => {
       const totalAmount = state.shoppingCart.reduce((acc, item) => {
         const product = state.products.find(
-          (product) => product.sku === item.sku
+          (product) => product.referencia === item.referencia
         );
         const price = product?.price ?? 0;
         return acc + item.qty * price;

@@ -77,7 +77,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
     },
   },
   {
-    accessorKey: "description",
+    accessorKey: "descripcion",
     header: ({ column }) => {
       return (
         <Button
@@ -89,10 +89,10 @@ export const createColumns = (): ColumnDef<Product>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("description")}</div>,
+    cell: ({ row }) => <div>{row.getValue("descripcion")}</div>,
   },
   {
-    accessorKey: "sku",
+    accessorKey: "referencia",
     header: ({ column }) => {
       return (
         <Button
@@ -104,7 +104,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("sku")}</div>,
+    cell: ({ row }) => <div>{row.getValue("referencia")}</div>,
   },
   {
     accessorKey: "brand",
@@ -155,7 +155,7 @@ export const createColumns = (): ColumnDef<Product>[] => [
       </Button>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("price"));
+      const amount = parseFloat(row.getValue("price") ?? "");
       const formatted = formatPrice(amount);
 
       return <div className="">{formatted}</div>;
@@ -166,10 +166,14 @@ export const createColumns = (): ColumnDef<Product>[] => [
     header: "Cantidad",
     cell: ({ row }) => {
       const stock: number = row.original.stock;
-      const referencia: string = row.getValue("sku");
+      const referencia: string = row.getValue("referencia");
       return (
         <div className="flex items-center space-x-2">
-          <QuantitySelector maxStock={stock} sku={referencia} flag={true} />
+          <QuantitySelector
+            maxStock={stock}
+            referencia={referencia}
+            flag={true}
+          />
         </div>
       );
     },
@@ -201,7 +205,7 @@ export function MainTable() {
   const [searchValue, setSearchValue] = React.useState("");
   const [filterValue, setFilterValue] = React.useState("");
 
-  const brands = Array.from(new Set(data.map((item) => item.brand)))
+  const brands = Array.from(new Set(data.map((item) => item.marca)))
     .filter((el) => el !== "")
     .sort();
 
@@ -217,7 +221,9 @@ export function MainTable() {
   };
 
   const handleSearch = () => {
-    const columnHead = isNaN(Number(searchValue)) ? "description" : "sku";
+    const columnHead = isNaN(Number(searchValue))
+      ? "descripcion"
+      : "referencia";
     const column = table.getColumn(columnHead);
     column?.setFilterValue(searchValue);
     setFilterValue(searchValue);

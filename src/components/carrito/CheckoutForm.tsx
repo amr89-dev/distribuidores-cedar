@@ -67,11 +67,13 @@ export default function CheckoutForm() {
 
   const handleSubmit = async () => {
     const items = shoppingCart.map((item) => {
-      const product = products.find((product) => product.sku === item.sku);
+      const product = products.find(
+        (product) => product.referencia === item.referencia
+      );
       return {
-        sku: item.sku,
-        description: product?.description,
-        brand: product?.brand,
+        referencia: item.referencia,
+        descripcion: product?.descripcion,
+        brand: product?.marca,
         price: product?.price,
         totalAmount: item.qty * (product?.price ?? 0),
         qty: item.qty,
